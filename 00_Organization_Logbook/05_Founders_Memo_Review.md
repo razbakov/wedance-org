@@ -95,3 +95,24 @@ I'd like to propose:
 Let me know your thoughts. Happy to discuss any of these.
 
 — Alex
+
+---
+
+## Kirill's Response (2026-04-07, via WeDance HQ Telegram)
+
+Kirill is broadly aligned with the memo direction but wants **3 clarifications resolved before signing**:
+
+### Open Items Before Signing
+
+| # | Clarification | Status | Notes |
+|---|--------------|--------|-------|
+| K-1 | **Schedule A for pre-existing assets** — wants an explicit inventory of pre-existing assets (repos, domains, accounts, design files) attached as Schedule A, rather than the general sentence in Section 4 | Open | Alex proposed a general sentence (see item 1 above); Kirill wants the actual list |
+| K-2 | **Narrower non-use clause** — wants the non-use restriction in Section 5 tied specifically to project assets and confidential information, not a broad non-compete | Open | Current Section 5 already scoped to 12 months + "competing version" definition; Kirill wants it narrower still — tied to actual project assets/confidential info only |
+| K-3 | **Practical shared access to critical systems** — wants documented, working shared access to all critical systems (repos, cloud accounts, domains, analytics, etc.) before signing | Open | Related to K-1; ensure both founders have real access, not just a list |
+
+### Next Steps
+
+1. Draft Schedule A with full asset inventory (addresses K-1 and K-3)
+2. Revise Section 5 non-use clause to scope it to project assets and confidential information (addresses K-2)
+3. Verify and document shared access to all critical systems (addresses K-3)
+4. Both founders review revised memo and sign
