@@ -46,6 +46,7 @@
 - Kirill's organizer network and SDTV contacts
 - Festival calendar databases
 - Claude API
+- [Organizer Pitch Playbook v1.0](../../01_Domains/Festival_Experience/Governance/Organizer_Pitch_Playbook_v1.md) — segmented pitch templates and sales approach by organizer type
 
 ## Delegator Responsibilities
 - Kirill: provide network access, send outreach, relay organizer feedback

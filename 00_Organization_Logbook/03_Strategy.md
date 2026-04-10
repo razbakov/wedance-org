@@ -28,6 +28,24 @@ Once validated, layer on Meetup Planner features (social coordination: rides, ro
 1. Festival Schedule → validate discovery (current phase)
 2. Meetup Planner → validate social coordination and monetization (next phase)
 
+## Organizer Segmentation (Kirill, 2026-04-10)
+
+Two distinct organizer types require different approaches:
+
+**Type 1 — "We build our own digital ecosystem"**
+These organizers have strong digital ownership. Cannot sell them "a page." Possible offerings:
+- White-label layer
+- Engagement add-on
+- Embedded experience
+- Audience activation around their own channels
+
+**Type 2 — "Chaos, scattered info, everything manual"**
+These organizers have no strong digital presence. Can sell directly and simply.
+
+**Implication for pilot:** Start with Type 2 organizers who don't have a strong digital ownership ego. They have the clearest pain point (scattered info) and lowest resistance to adopting our schedule tool.
+
+**Pitch approach:** Outcome-led, not feature-led. Never sell "a platform" — sell compression of complexity. Use tailored samples built from the organizer's own festival data instead of generic demos. See [Organizer Pitch Playbook v1.0](../01_Domains/Festival_Experience/Governance/Organizer_Pitch_Playbook_v1.md).
+
 ## Responsibilities
 
 | Who | What |

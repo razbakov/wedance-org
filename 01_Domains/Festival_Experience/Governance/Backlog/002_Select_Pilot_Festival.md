@@ -13,6 +13,7 @@ The strategy says "start with one festival where we have connections." The partn
 - Alex or Kirill has a connection to the organizer or community
 - Static schedule available to convert
 - Happening soon enough to maintain momentum
+- **Prefer Type 2 organizer** — no strong digital ecosystem of their own (scattered info, manual processes). Avoid organizers with strong digital ownership ego who would resist external tools. See [Strategy — Organizer Segmentation](../../../00_Organization_Logbook/03_Strategy.md).
 
 ## Decision needed from
 Partnership (Alex + Kirill)
