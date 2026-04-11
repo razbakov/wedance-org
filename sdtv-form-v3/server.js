@@ -542,6 +542,80 @@ async function sendVideoReadyEmail({ to, dancerName, festival, deliveryUrl }) {
   } catch (err) { console.error('Video ready email error:', err.message); }
 }
 
+// ── Archive Offer Email ─────────────────────────────
+// Warm/nostalgic tone — people receive this about a dance filmed years ago.
+// Price is configurable, not hardcoded.
+async function sendArchiveOfferEmail({ to, dancerName, festival, year, price, currency, deliveryUrl }) {
+  if (!emailTransport) return;
+  const e = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+  const serif = "Georgia,'Times New Roman',Times,serif";
+  const c = { bg:'#08080a', card:'#111113', surface:'#161618', ivory:'#f4f1ec', muted:'#8a8580', faint:'#555350', dim:'#3a3835', red:'#c1453b', border:'rgba(255,255,255,0.05)', gold:'#c9a96e' };
+  const name = dancerName || 'there';
+  const cur = currency || 'EUR';
+  const priceDisplay = `${cur === 'EUR' ? '\u20ac' : cur} ${price || 25}`;
+  const festText = festival ? ` from <strong style="color:${c.ivory};">${e(festival)}</strong>` : '';
+  const yearText = year ? ` (${year})` : '';
+  const subject = festival
+    ? `We found your dance — ${festival}${yearText}`
+    : `A dance memory from your past${yearText}`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:${c.bg};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${c.bg};">
+<tr><td align="center" style="padding:32px 16px 40px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:440px;background-color:${c.card};border-radius:20px;overflow:hidden;">
+
+  <tr><td style="padding:28px 28px 0;text-align:center;">
+    <span style="font-family:${sans};font-size:10px;font-weight:700;letter-spacing:0.2em;color:${c.gold};text-transform:uppercase;">Social Dance TV &middot; Archive</span>
+  </td></tr>
+  <tr><td style="padding:16px 32px 0;"><div style="height:1px;background:${c.border};"></div></td></tr>
+
+  <tr><td style="padding:24px 28px 0;text-align:center;">
+    <h1 style="margin:0;font-family:${serif};font-size:26px;font-weight:700;color:${c.ivory};line-height:1.25;">We found your dance</h1>
+  </td></tr>
+
+  <tr><td style="padding:14px 28px 0;text-align:center;">
+    <p style="margin:0;font-family:${sans};font-size:14px;color:${c.muted};line-height:1.65;">Hey ${e(name)}, while going through our archive we found a dance video of yours${festText}${yearText}. We thought you might want to keep this memory.</p>
+  </td></tr>
+
+  <tr><td style="padding:18px 28px 0;text-align:center;">
+    <div style="display:inline-block;background:linear-gradient(135deg,rgba(201,169,110,0.1),rgba(201,169,110,0.04));border:1px solid rgba(201,169,110,0.15);border-radius:14px;padding:16px 28px;">
+      <div style="font-family:${sans};font-size:11px;color:${c.gold};letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Archive special</div>
+      <div style="font-family:${serif};font-size:28px;font-weight:700;color:${c.ivory};">${priceDisplay}</div>
+      <div style="font-family:${sans};font-size:11px;color:${c.faint};margin-top:4px;">Full HD &middot; No watermark &middot; Yours forever</div>
+    </div>
+  </td></tr>
+
+  <tr><td style="padding:22px 24px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td align="center" style="background-color:${c.gold};border-radius:14px;">
+        <a href="${e(deliveryUrl)}" style="display:block;padding:17px 32px;font-family:${sans};font-size:16px;font-weight:700;color:#1a1a1a;text-decoration:none;text-align:center;line-height:1.2;">Get Your Video</a>
+      </td></tr>
+    </table>
+  </td></tr>
+
+  <tr><td style="padding:16px 28px 0;text-align:center;">
+    <p style="margin:0;font-family:${sans};font-size:12px;color:${c.faint};line-height:1.5;">This is a one-time archive offer. The video has been preserved in our library and is ready for you to download.</p>
+  </td></tr>
+
+  <tr><td style="padding:28px 28px 28px;text-align:center;">
+    <p style="margin:0;font-family:${sans};font-size:10px;color:${c.dim};line-height:1.6;">
+      Social Dance TV &middot; <a href="https://instagram.com/socialdancetv" style="color:${c.faint};text-decoration:none;">@socialdancetv</a>
+    </p>
+  </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`;
+
+  try {
+    await emailTransport.sendMail({ from: `"Social Dance TV" <${GMAIL_USER}>`, to, subject, html });
+    console.log('Archive offer email sent to', to);
+  } catch (err) { console.error('Archive offer email error:', err.message); }
+}
+
 // ── STRIPE ──────────────────────────────────────────
 const STRIPE_SECRET = process.env.STRIPE_SECRET;
 let stripe = null;
@@ -1008,6 +1082,41 @@ app.post('/api/send-video-ready-alert', async (req, res) => {
   } catch (e) {
     console.error('Video ready alert error:', e.message);
     res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
+// ── POST /api/send-archive-offer ────────────────────
+// Send archive video offer — separate campaign from current festival sales.
+// Price is passed per-request (not hardcoded) so it can be adjusted.
+app.post('/api/send-archive-offer', async (req, res) => {
+  try {
+    const { email, dancerName, festival, year, price, currency, captureId } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    // Artists don't buy videos
+    if (await isPersonArtist(email)) {
+      console.log(`Skipped archive offer for artist: ${email}`);
+      return res.json({ ok: true, skipped: true, reason: 'artist' });
+    }
+
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const deliveryUrl = captureId
+      ? `${baseUrl}/delivery?id=${encodeURIComponent(captureId)}`
+      : baseUrl;
+
+    await sendArchiveOfferEmail({
+      to: email,
+      dancerName: dancerName || '',
+      festival: festival || '',
+      year: year || '',
+      price: price || 25,
+      currency: currency || 'EUR',
+      deliveryUrl,
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Archive offer error:', e.message);
+    res.status(500).json({ error: 'Failed to send archive offer' });
   }
 });
 
