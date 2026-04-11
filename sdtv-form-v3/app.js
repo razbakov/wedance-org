@@ -2783,6 +2783,7 @@ function checkURLParams() {
 
   if (flow === 'archive') {
     state.currentFlow = 'archive';
+    const auto = params.get('auto') === '1';
     // Pre-select festival if specified
     if (festival) {
       const match = [...liveFestivals, ...festivals].find(f =>
@@ -2790,6 +2791,12 @@ function checkURLParams() {
         (f.slug && f.slug.toLowerCase() === festival.toLowerCase())
       );
       if (match) state.selectedFestival = match;
+    }
+    // Auto-search: skip all steps, go straight to results
+    if (auto && ig) {
+      showScreen('archive-identity');
+      setTimeout(() => searchArchive(), 300);
+      return 'archive';
     }
     // If IG is known, skip to identity screen with pre-fill
     if (ig && state.selectedFestival) {

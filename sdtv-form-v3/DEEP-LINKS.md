@@ -14,6 +14,7 @@ Local: `http://localhost:8001`
 | `email` | email address | Pre-fills email, saves to localStorage |
 | `source` | any string | Tracks traffic source (saved to state) |
 | `utm_source` | any string | Alias for `source` |
+| `auto` | `1` | Auto-search: skip all steps, show results immediately (requires `ig`) |
 
 ## ManyChat Button URLs
 
@@ -28,6 +29,10 @@ https://form.socialdancetv.com/?flow=archive&fest=mambo-nights
 With IG pre-filled (skip typing):
 ```
 https://form.socialdancetv.com/?flow=archive&ig={{instagram_handle}}
+```
+**Auto-search (ManyChat magic — zero steps, video found instantly):**
+```
+https://form.socialdancetv.com/?flow=archive&ig={{instagram_username}}&auto=1&source=manychat
 ```
 
 ### Book Filming (Preorder)
