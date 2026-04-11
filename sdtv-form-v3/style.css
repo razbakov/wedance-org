@@ -345,6 +345,14 @@ body {
   text-align: center;
 }
 
+.trust-line {
+  font-size: 11px;
+  color: var(--sdtv-text-faint);
+  text-align: center;
+  letter-spacing: 0.04em;
+  margin: -4px 0 8px;
+}
+
 /* ========== INTENT CARDS (Routing) ========== */
 .intent-cards {
   display: flex;
