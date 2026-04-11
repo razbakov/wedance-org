@@ -3483,12 +3483,26 @@ function showArchiveEmailField() {
   document.getElementById('archiveCheckoutEmail').focus();
 }
 
-// Hook into showScreen to set up email on checkout
+// Hook into showScreen to set up email + IG pre-fill on checkout
 const _origShowScreenEmail = showScreen;
 showScreen = function(id, ...args) {
   _origShowScreenEmail(id, ...args);
   if (id === 'archive-checkout') {
     setTimeout(setupArchiveCheckoutEmail, 50);
+  }
+  // Pre-fill IG from URL/state on checkout screens
+  if (state.dancerIdentity) {
+    const igMap = {
+      'preorder-checkout': 'preorderInstagram',
+      'visibility-checkout': 'visInstagram',
+    };
+    const fieldId = igMap[id];
+    if (fieldId) {
+      setTimeout(() => {
+        const f = document.getElementById(fieldId);
+        if (f && !f.value) f.value = state.dancerIdentity;
+      }, 50);
+    }
   }
 };
 
