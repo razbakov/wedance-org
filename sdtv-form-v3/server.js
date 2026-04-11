@@ -628,6 +628,21 @@ async function airtableFetch(path, opts = {}) {
   }
 }
 
+// ── Artist check helper ─────────────────────────────
+// Artists don't buy videos — skip video sale emails for them.
+// Checks People table Contact Type field. Returns false if unknown.
+async function isPersonArtist(email) {
+  if (!email) return false;
+  try {
+    const safe = sanitizeForFormula(email);
+    const formula = encodeURIComponent(`LOWER({Email})='${safe.toLowerCase()}'`);
+    const data = await airtableFetch(
+      `${TABLES.people}?filterByFormula=${formula}&fields%5B%5D=Contact%20Type&maxRecords=1`
+    );
+    return data.records?.[0]?.fields?.['Contact Type'] === 'Artist';
+  } catch { return false; }
+}
+
 // ── GET /api/festivals ──────────────────────────────
 // Returns all festivals for the archive search + reserve filming
 let festivalCache = { data: null, ts: 0 };
@@ -917,6 +932,12 @@ app.post('/api/send-delivery-email', async (req, res) => {
       return res.status(400).json({ error: 'Email and captureId required' });
     }
 
+    // Artists don't buy videos — skip sale emails for them
+    if (await isPersonArtist(email)) {
+      console.log(`Skipped delivery email for artist: ${email}`);
+      return res.json({ ok: true, skipped: true, reason: 'artist' });
+    }
+
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const deliveryUrl = `${baseUrl}/delivery?id=${encodeURIComponent(captureId)}`;
 
@@ -1001,6 +1022,13 @@ app.post('/api/send-video-ready-alert', async (req, res) => {
   try {
     const { email, dancerName, festival, captureId } = req.body || {};
     if (!email || !captureId) return res.status(400).json({ error: 'Email and captureId required' });
+
+    // Artists don't buy videos — skip sale emails for them
+    if (await isPersonArtist(email)) {
+      console.log(`Skipped video ready email for artist: ${email}`);
+      return res.json({ ok: true, skipped: true, reason: 'artist' });
+    }
+
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const deliveryUrl = `${baseUrl}/delivery?id=${encodeURIComponent(captureId)}`;
     await sendVideoReadyEmail({ to: email, dancerName: dancerName || '', festival: festival || '', deliveryUrl });
