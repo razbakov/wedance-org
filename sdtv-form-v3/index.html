@@ -954,7 +954,7 @@ if ('serviceWorker' in navigator) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           Back
         </button>
-        <div class="step-indicator">STEP 1 OF 3</div>
+        <div class="step-indicator">STEP 1 OF 4</div>
         <h2 class="screen-title">What's your goal?</h2>
         <p class="screen-subtitle">For dancers, artists, and couples who want more visibility through SDTV</p>
         
@@ -993,7 +993,7 @@ if ('serviceWorker' in navigator) {
     </div>
 
     <!-- ============================================ -->
-    <!-- VISIBILITY: PACKAGES (Value Ladder) -->
+    <!-- VISIBILITY: PACKAGES — RECOGNITION PATH -->
     <!-- ============================================ -->
     <div class="screen" id="screen-visibility-packages">
       <div class="screen-content">
@@ -1001,45 +1001,151 @@ if ('serviceWorker' in navigator) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           Back
         </button>
-        <div class="step-indicator">STEP 2 OF 3</div>
-        <h2 class="screen-title">Choose your visibility plan</h2>
-        
-        <!-- Monthly Plan — FIRST & RECOMMENDED -->
-        <button class="vis-plan-card vis-plan-card--recommended" onclick="selectVisibilityPlan('monthly')">
-          <div class="vis-plan-badge">Recommended</div>
+        <div class="step-indicator">STEP 2 OF 4</div>
+        <h2 class="screen-title" id="visPackagesTitle">Build your visibility</h2>
+        <p class="trust-line">509K+ followers · Avg. 50K+ views per post</p>
+
+        <!-- Momentum Plan — 2x/week — HIGHLIGHTED -->
+        <button class="vis-plan-card vis-plan-card--recommended" onclick="selectVisibilityPlan('momentum')">
+          <div class="vis-plan-badge">Best Results</div>
           <div class="vis-plan-header">
-            <h3 class="vis-plan-name">Monthly Visibility</h3>
-            <div class="vis-plan-price">€349<span class="vis-plan-period">/mo</span></div>
+            <h3 class="vis-plan-name">Momentum Plan</h3>
+            <div class="vis-plan-price">€599<span class="vis-plan-period">/mo</span></div>
           </div>
-          <p class="vis-plan-desc">Consistent weekly presence on SDTV's channels. Best for dancers building long-term recognition.</p>
+          <p class="vis-plan-desc">2 posts per week. Stronger recall, faster audience growth, more recognition.</p>
           <ul class="vis-plan-features">
-            <li>✓ 1 post per week on @socialdancetv</li>
-            <li>✓ Curated editing & hashtag optimization</li>
+            <li>✓ 2 posts/week on @socialdancetv</li>
             <li>✓ Instagram Collab — appears on your profile</li>
-            <li>✓ Avg. 50K+ views per post</li>
+            <li>✓ Curated editing & hashtag strategy</li>
+            <li>✓ More repetition = more audience memory</li>
             <li>✓ Cancel anytime</li>
           </ul>
-          <div class="vis-plan-cta">Start Monthly Plan →</div>
+          <div class="vis-plan-cta">Start Momentum Plan →</div>
         </button>
-        
-        <!-- Feature Boost — SECONDARY -->
+
+        <!-- Recognition Plan — 1x/week -->
+        <button class="vis-plan-card" onclick="selectVisibilityPlan('recognition')">
+          <div class="vis-plan-header">
+            <h3 class="vis-plan-name">Recognition Plan</h3>
+            <div class="vis-plan-price">€349<span class="vis-plan-period">/mo</span></div>
+          </div>
+          <p class="vis-plan-desc">1 post per week. Steady visibility and consistent presence on SDTV.</p>
+          <ul class="vis-plan-features">
+            <li>✓ 1 post/week on @socialdancetv</li>
+            <li>✓ Instagram Collab — appears on your profile</li>
+            <li>✓ Curated editing & hashtag strategy</li>
+            <li>✓ Cancel anytime</li>
+          </ul>
+          <div class="vis-plan-cta">Start Recognition Plan →</div>
+        </button>
+
+        <!-- One-Time Feature — secondary link -->
+        <div class="single-post-link">
+          <button class="btn-link" onclick="selectVisibilityPlan('feature')">Just need a one-time feature? Request here →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- VISIBILITY: PACKAGES — PROMOTE EVENT PATH -->
+    <!-- ============================================ -->
+    <div class="screen" id="screen-visibility-event">
+      <div class="screen-content">
+        <button class="back-btn" onclick="goBack()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div class="step-indicator">STEP 2 OF 4</div>
+        <h2 class="screen-title">Promote your moment</h2>
+        <p class="screen-subtitle">Workshop, show, bootcamp, launch — we amplify it</p>
+
+        <!-- One-Time Feature — primary here -->
         <button class="vis-plan-card" onclick="selectVisibilityPlan('feature')">
           <div class="vis-plan-header">
-            <h3 class="vis-plan-name">Feature Boost</h3>
+            <h3 class="vis-plan-name">One-Time Feature</h3>
             <div class="vis-plan-price">€150</div>
           </div>
-          <p class="vis-plan-desc">One-time featured placement on SDTV channels. Great for a specific moment or event.</p>
+          <p class="vis-plan-desc">Single featured post for your workshop, performance, bootcamp, or special announcement.</p>
           <ul class="vis-plan-features">
-            <li>✓ Priority featured placement</li>
+            <li>✓ Featured on @socialdancetv</li>
             <li>✓ Professional editing included</li>
             <li>✓ Published within 5 days</li>
+            <li>✓ Instagram Collab format</li>
           </ul>
-          <div class="vis-plan-cta">Request Feature Boost →</div>
+          <div class="vis-plan-cta">Request Feature →</div>
         </button>
-        
-        <!-- Single Post — HIDDEN -->
-        <div class="single-post-link">
-          <button class="btn-link" onclick="contactForSinglePost()">Looking for a single post? Contact us</button>
+
+        <!-- 1-Month Event Push 1x -->
+        <button class="vis-plan-card" onclick="selectVisibilityPlan('event-1x')">
+          <div class="vis-plan-header">
+            <h3 class="vis-plan-name">Event Push · 1x/week</h3>
+            <div class="vis-plan-price">€349<span class="vis-plan-period">/mo</span></div>
+          </div>
+          <p class="vis-plan-desc">1-month campaign. Build anticipation and keep your event visible week by week.</p>
+          <ul class="vis-plan-features">
+            <li>✓ 4 posts over 1 month</li>
+            <li>✓ Content calendar included</li>
+            <li>✓ Collab format on each post</li>
+          </ul>
+          <div class="vis-plan-cta">Start 1x Campaign →</div>
+        </button>
+
+        <!-- 1-Month Event Push 2x — recommended for stronger push -->
+        <button class="vis-plan-card vis-plan-card--recommended" onclick="selectVisibilityPlan('event-2x')">
+          <div class="vis-plan-badge">Stronger Push</div>
+          <div class="vis-plan-header">
+            <h3 class="vis-plan-name">Event Push · 2x/week</h3>
+            <div class="vis-plan-price">€599<span class="vis-plan-period">/mo</span></div>
+          </div>
+          <p class="vis-plan-desc">Maximum impact. 8 posts in 1 month. More repetition, more recall, more signups.</p>
+          <ul class="vis-plan-features">
+            <li>✓ 8 posts over 1 month</li>
+            <li>✓ Content calendar + strategy</li>
+            <li>✓ Collab format on each post</li>
+            <li>✓ Best for filling workshops & events</li>
+          </ul>
+          <div class="vis-plan-cta">Start 2x Campaign →</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- VISIBILITY: CONTENT READINESS -->
+    <!-- ============================================ -->
+    <div class="screen" id="screen-visibility-content">
+      <div class="screen-content">
+        <button class="back-btn" onclick="goBack()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div class="step-indicator">STEP 3 OF 4</div>
+        <h2 class="screen-title">Your content</h2>
+        <p class="screen-subtitle">How should we handle the content for your posts?</p>
+
+        <div class="outcome-cards">
+          <button class="outcome-card" onclick="selectContentReadiness('have-content')">
+            <span class="outcome-emoji">📦</span>
+            <div class="outcome-text">
+              <h3 class="outcome-label">I have content ready</h3>
+              <p class="outcome-desc">Videos or photos ready to be edited and published</p>
+            </div>
+          </button>
+
+          <button class="outcome-card" onclick="selectContentReadiness('need-help')">
+            <span class="outcome-emoji">🎬</span>
+            <div class="outcome-text">
+              <h3 class="outcome-label">I need SDTV to create content</h3>
+              <p class="outcome-desc">Book filming at your next event or performance</p>
+            </div>
+          </button>
+
+          <button class="outcome-card" onclick="selectContentReadiness('hybrid')">
+            <span class="outcome-emoji">🔄</span>
+            <div class="outcome-text">
+              <h3 class="outcome-label">Mix of both</h3>
+              <p class="outcome-desc">Some content ready, need help with the rest</p>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -1053,7 +1159,7 @@ if ('serviceWorker' in navigator) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           Back
         </button>
-        <div class="step-indicator">STEP 3 OF 3</div>
+        <div class="step-indicator">STEP 4 OF 4</div>
         <h2 class="screen-title" id="visCheckoutTitle">Start Your Monthly Plan</h2>
         
         <div class="order-summary">

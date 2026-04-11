@@ -634,9 +634,11 @@ function updateProgressBar() {
     progress = steps[state.currentScreen] || 0;
   } else if (state.currentFlow === 'visibility') {
     const steps = {
-      'visibility-intro': 25,
-      'visibility-packages': 50,
-      'visibility-checkout': 75,
+      'visibility-intro': 20,
+      'visibility-packages': 40,
+      'visibility-event': 40,
+      'visibility-content': 60,
+      'visibility-checkout': 80,
       'visibility-confirmation': 100,
     };
     progress = steps[state.currentScreen] || 0;
@@ -2079,38 +2081,52 @@ function selectVisibilityOutcome(outcome) {
     return;
   }
 
-  showScreen('visibility-packages');
+  if (outcome === 'event') {
+    showScreen('visibility-event');
+  } else {
+    showScreen('visibility-packages');
+  }
 }
 
 // ==========================================
 // VISIBILITY FLOW — PACKAGE SELECTION
 // ==========================================
+const visPlans = {
+  momentum:     { name: 'Momentum Plan · 2x/week', price: '€599/mo', total: '€599', terms: '€599/month · Cancel anytime · First post within 5 days', btn: 'Start Momentum Plan — €599', title: 'Start Your Momentum Plan' },
+  recognition:  { name: 'Recognition Plan · 1x/week', price: '€349/mo', total: '€349', terms: '€349/month · Cancel anytime · First post within 5 days', btn: 'Start Recognition Plan — €349', title: 'Start Your Recognition Plan' },
+  feature:      { name: 'One-Time Feature', price: '€150', total: '€150', terms: "€150 · We'll review and publish within 5 days", btn: 'Submit Feature Request — €150', title: 'Request a Feature' },
+  'event-1x':   { name: 'Event Push · 1x/week', price: '€349/mo', total: '€349', terms: '€349 for 1 month · 4 posts · Content calendar included', btn: 'Start Event Campaign — €349', title: 'Start Your Event Campaign' },
+  'event-2x':   { name: 'Event Push · 2x/week', price: '€599/mo', total: '€599', terms: '€599 for 1 month · 8 posts · Maximum impact', btn: 'Start Event Campaign — €599', title: 'Start Your Event Campaign' },
+};
+
 function selectVisibilityPlan(plan) {
   state.visibilityPlan = plan;
+  const p = visPlans[plan] || visPlans.recognition;
 
-  if (plan === 'monthly') {
-    document.getElementById('visCheckoutTitle').textContent = 'Start Your Monthly Plan';
-    document.getElementById('visOrderName').textContent = 'Monthly Visibility';
-    document.getElementById('visOrderPrice').textContent = '€349/mo';
-    document.getElementById('visOrderTotal').textContent = '€349';
-    document.getElementById('visCheckoutTerms').textContent = '€349/month · Cancel anytime · First post within 5 days';
-    document.getElementById('visApplePayTotal').textContent = '€349';
-    document.getElementById('visCheckoutBtnText').textContent = 'Start Monthly Plan — €349';
-  } else if (plan === 'feature') {
-    document.getElementById('visCheckoutTitle').textContent = 'Request a Feature Boost';
-    document.getElementById('visOrderName').textContent = 'Feature Boost';
-    document.getElementById('visOrderPrice').textContent = 'From €150';
-    document.getElementById('visOrderTotal').textContent = 'From €150';
-    document.getElementById('visCheckoutTerms').textContent = "From €150 · We'll review and get back within 24h";
-    document.getElementById('visApplePayTotal').textContent = '€150';
-    document.getElementById('visCheckoutBtnText').textContent = 'Submit Request';
-  }
+  // Save for checkout
+  state.visPlanData = p;
 
-  showScreen('visibility-checkout');
+  // Go to content readiness step
+  showScreen('visibility-content');
 }
 
-function contactForSinglePost() {
-  showToast("For single posts, DM us on Instagram @socialdancetv — we'll sort you out.");
+// ==========================================
+// VISIBILITY FLOW — CONTENT READINESS
+// ==========================================
+function selectContentReadiness(readiness) {
+  state.contentReadiness = readiness;
+  const p = state.visPlanData || visPlans.recognition;
+
+  // Populate checkout
+  document.getElementById('visCheckoutTitle').textContent = p.title;
+  document.getElementById('visOrderName').textContent = p.name;
+  document.getElementById('visOrderPrice').textContent = p.price;
+  document.getElementById('visOrderTotal').textContent = p.total;
+  document.getElementById('visCheckoutTerms').textContent = p.terms;
+  document.getElementById('visApplePayTotal').textContent = p.total;
+  document.getElementById('visCheckoutBtnText').textContent = p.btn;
+
+  showScreen('visibility-checkout');
 }
 
 // ==========================================
@@ -2171,7 +2187,7 @@ async function simulateVisibilityPayment() {
         ig: instagram,
         email: email,
         name: name,
-        source: 'Visibility ' + (state.visibilityGoal || 'Lead')
+        source: 'Visibility ' + (state.visibilityPlan || 'Lead')
       })
     });
   } catch (e) {
@@ -2184,9 +2200,12 @@ async function simulateVisibilityPayment() {
   {
     // keep original UI logic
 
-    if (state.visibilityPlan === 'monthly') {
-      document.getElementById('visConfirmTitle').textContent = 'Your Visibility Plan is Active';
-      document.getElementById('visConfirmSubtitle').textContent = "Welcome aboard! Here's what happens next.";
+    const isRecurring = ['momentum', 'recognition', 'event-1x', 'event-2x'].includes(state.visibilityPlan);
+    const planName = state.visPlanData?.name || state.visibilityPlan;
+
+    if (isRecurring) {
+      document.getElementById('visConfirmTitle').textContent = 'Your Plan is Active';
+      document.getElementById('visConfirmSubtitle').textContent = `${planName} — welcome aboard!`;
       document.getElementById('visConfirmTimeline').innerHTML = `
         <div class="timeline-step done">
           <div class="timeline-dot"></div>
@@ -2202,12 +2221,12 @@ async function simulateVisibilityPayment() {
         </div>
         <div class="timeline-step">
           <div class="timeline-dot"></div>
-          <span>Weekly posting schedule begins</span>
+          <span>${state.contentReadiness === 'need-help' ? 'Content creation begins' : 'Weekly posting schedule begins'}</span>
         </div>
       `;
-    } else if (state.visibilityPlan === 'feature') {
+    } else {
       document.getElementById('visConfirmTitle').textContent = 'Your Request is Received';
-      document.getElementById('visConfirmSubtitle').textContent = "We'll review your request and send you a checkout link within 24 hours.";
+      document.getElementById('visConfirmSubtitle').textContent = "We'll review and publish within 5 days.";
       document.getElementById('visConfirmTimeline').innerHTML = `
         <div class="timeline-step done">
           <div class="timeline-dot"></div>
@@ -2219,7 +2238,7 @@ async function simulateVisibilityPayment() {
         </div>
         <div class="timeline-step">
           <div class="timeline-dot"></div>
-          <span>Checkout link sent within 24h</span>
+          <span>${state.contentReadiness === 'need-help' ? 'Content creation + editing' : 'Editing & preparation'}</span>
         </div>
         <div class="timeline-step">
           <div class="timeline-dot"></div>
@@ -2228,12 +2247,12 @@ async function simulateVisibilityPayment() {
       `;
     }
 
-    // Send visibility welcome email (monthly plan only)
-    if (state.visibilityPlan === 'monthly') {
+    // Send visibility welcome email (recurring plans)
+    if (isRecurring) {
       try {
         await fetch(`${API}/api/send-visibility-welcome`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, plan: 'monthly', instagram })
+          body: JSON.stringify({ email, name, plan: planName, instagram })
         });
       } catch (e) { console.error('Visibility welcome email error:', e); }
     }
