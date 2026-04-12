@@ -485,6 +485,10 @@ function resetForm() {
   state.slotSkipped = false;
   state.visibilityOutcome = null;
   state.visibilityPlan = null;
+  state.visPlanData = null;
+  state.contentReadiness = null;
+  state.isEarlyBird = false;
+  state.reservationRef = null;
   state.walkupType = 'social';
   state.walkupPayment = 'later';
 
@@ -3355,7 +3359,8 @@ function updateCheckoutTotal(flow) {
     // Hide card when total is 0
     const cardEl = document.getElementById('unlockCardElement')?.closest('.form-group');
     if (cardEl) cardEl.style.display = total === 0 ? 'none' : '';
-    if (unlockBtn && total === 0) unlockBtn.disabled = false;
+    const unlockBtn = document.getElementById('unlockBtn');
+    if (unlockBtn && total === 0) { unlockBtn.disabled = false; unlockBtn.classList.remove('disabled'); }
 
     // Discount line in summary
     const discountRow = document.getElementById('unlockDiscountRow');

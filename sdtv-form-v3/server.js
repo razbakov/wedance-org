@@ -1357,13 +1357,21 @@ app.post('/api/create-payment-intent', async (req, res) => {
       }
     }
 
-    // Apply user promo code on top (if valid and no early-bird already applied)
-    if (promoId && !appliedCoupon) {
-      // User-submitted promo — discount already calculated client-side
-      // but we re-validate server-side
-      const clientAmount = req.body.amount;
-      if (clientAmount && clientAmount < amount && clientAmount >= 0) {
-        amount = Math.round(clientAmount);
+    // Apply user promo code — re-validate server-side via Stripe
+    if (promoId && !appliedCoupon && stripe) {
+      try {
+        const promo = await stripe.promotionCodes.retrieve(promoId, { expand: ['coupon'] });
+        if (promo.active && promo.coupon) {
+          const coupon = promo.coupon;
+          if (coupon.percent_off) {
+            amount = Math.round(amount * (1 - coupon.percent_off / 100));
+          } else if (coupon.amount_off) {
+            amount = Math.max(0, amount - coupon.amount_off);
+          }
+          appliedCoupon = promo.code;
+        }
+      } catch (e) {
+        console.warn('Promo re-validation failed, using base price:', e.message);
       }
     }
 
@@ -1475,6 +1483,11 @@ function serveFile(filePath, req, res) {
 
   if (rangeHeader) {
     const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+    if (!match) {
+      res.writeHead(200, { 'Content-Type': 'video/mp4', 'Content-Length': totalSize, 'Accept-Ranges': 'bytes' });
+      createReadStream(filePath).pipe(res);
+      return;
+    }
     const start = parseInt(match[1], 10);
     const end = match[2] ? Math.min(parseInt(match[2], 10), totalSize - 1) : totalSize - 1;
     const chunkSize = end - start + 1;
@@ -1501,6 +1514,7 @@ function serveFile(filePath, req, res) {
 // GET /api/preview/status/:captureId — check if preview is ready
 app.get('/api/preview/status/:captureId', (req, res) => {
   const { captureId } = req.params;
+  if (!/^rec[a-zA-Z0-9]{10,20}$/.test(captureId)) return res.status(400).json({ error: 'Invalid ID' });
   const filePath = path.join(PREVIEW_DIR, `${captureId}.mp4`);
   if (existsSync(filePath)) {
     res.json({ ready: true, size: statSync(filePath).size });
@@ -1511,7 +1525,7 @@ app.get('/api/preview/status/:captureId', (req, res) => {
 
 app.get('/api/preview/:captureId', async (req, res) => {
   const { captureId } = req.params;
-  if (!captureId || captureId === 'status') return res.status(400).end();
+  if (!captureId || captureId === 'status' || !/^rec[a-zA-Z0-9]{10,20}$/.test(captureId)) return res.status(400).end();
 
   try {
     // 1. Check disk cache — instant serve
