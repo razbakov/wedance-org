@@ -8,7 +8,8 @@
 
 | Project | Path | Status | Context |
 |---------|------|--------|---------|
-| Social Dance TV | _path TBD_ | Active — primary business | Default context when unspecified |
+| Social Dance TV | ~/Orgs/sdtv | Active — primary business | Default context when unspecified |
+| SDTV Org | ~/Orgs/sdtv-org | Active — SDTV organization | GitHub org config, team, shared settings |
 | Ikigai Team (ops) | ~/Orgs/ikigai | Active — personal OS | Agent system, ops, coordination |
 | Gig Agent | ~/Documents/Projects CURSOR/gig-agent | Active — SDTV tooling | Monday.com + Telegram gig CRM |
 
