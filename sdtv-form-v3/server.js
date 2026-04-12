@@ -705,11 +705,22 @@ async function airtableFetch(path, opts = {}) {
 // ── Artist check helper ─────────────────────────────
 // Artists don't buy videos — skip video sale emails for them.
 // Checks People table Contact Type field. Returns false if unknown.
-async function isPersonArtist(email) {
-  if (!email) return false;
+// Check any contact identifier (email, IG, name) against People table.
+// Artists don't buy videos — their flow is promo/visibility.
+async function isPersonArtist(email, ig) {
+  if (!email && !ig) return false;
   try {
-    const safe = sanitizeForFormula(email);
-    const formula = encodeURIComponent(`LOWER({Email})='${safe.toLowerCase()}'`);
+    const parts = [];
+    if (email) {
+      const safe = sanitizeForFormula(email);
+      parts.push(`LOWER({Email})='${safe.toLowerCase()}'`);
+    }
+    if (ig) {
+      const cleanIg = sanitizeForFormula(ig.replace(/^@/, ''));
+      parts.push(`LOWER({Instagram})='${cleanIg.toLowerCase()}'`);
+      parts.push(`LOWER({Instagram})='@${cleanIg.toLowerCase()}'`);
+    }
+    const formula = encodeURIComponent(`OR(${parts.join(',')})`);
     const data = await airtableFetch(
       `${TABLES.people}?filterByFormula=${formula}&fields%5B%5D=Contact%20Type&maxRecords=1`
     );
@@ -1007,8 +1018,8 @@ app.post('/api/send-delivery-email', async (req, res) => {
     }
 
     // Artists don't buy videos — skip sale emails for them
-    if (await isPersonArtist(email)) {
-      console.log(`Skipped delivery email for artist: ${email}`);
+    if (await isPersonArtist(email, ig)) {
+      console.log(`Skipped delivery email for artist: ${email || ig}`);
       return res.json({ ok: true, skipped: true, reason: 'artist' });
     }
 
@@ -1094,12 +1105,12 @@ app.post('/api/send-visibility-welcome', async (req, res) => {
 // ── POST /api/send-video-ready-alert ─────────────────
 app.post('/api/send-video-ready-alert', async (req, res) => {
   try {
-    const { email, dancerName, festival, captureId } = req.body || {};
+    const { email, dancerName, festival, captureId, ig } = req.body || {};
     if (!email || !captureId) return res.status(400).json({ error: 'Email and captureId required' });
 
     // Artists don't buy videos — skip sale emails for them
-    if (await isPersonArtist(email)) {
-      console.log(`Skipped video ready email for artist: ${email}`);
+    if (await isPersonArtist(email, ig)) {
+      console.log(`Skipped video ready email for artist: ${email || ig}`);
       return res.json({ ok: true, skipped: true, reason: 'artist' });
     }
 
@@ -1118,12 +1129,12 @@ app.post('/api/send-video-ready-alert', async (req, res) => {
 // Price is passed per-request (not hardcoded) so it can be adjusted.
 app.post('/api/send-archive-offer', async (req, res) => {
   try {
-    const { email, dancerName, festival, year, price, currency, captureId } = req.body || {};
+    const { email, dancerName, festival, year, price, currency, captureId, ig } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email required' });
 
     // Artists don't buy videos
-    if (await isPersonArtist(email)) {
-      console.log(`Skipped archive offer for artist: ${email}`);
+    if (await isPersonArtist(email, ig)) {
+      console.log(`Skipped archive offer for artist: ${email || ig}`);
       return res.json({ ok: true, skipped: true, reason: 'artist' });
     }
 
