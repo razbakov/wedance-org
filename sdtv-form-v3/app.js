@@ -2562,6 +2562,16 @@ async function checkVideoStatus() {
   btn.innerHTML = originalText; btn.disabled = false;
 }
 
+function goToArchiveCheckoutFromStatus() {
+  // Status screen found a ready video — route to archive preview/unlock flow
+  if (state.activeCapture) {
+    state.currentFlow = 'archive';
+    showScreen('archive-preview');
+  } else {
+    selectIntent('archive');
+  }
+}
+
 // ==========================================
 // SHARE
 // ==========================================
@@ -3116,12 +3126,15 @@ async function processPreorderPayment() {
   btn.disabled = true;
 
   try {
+    const baseAmount = total * 100;
     const piRes = await fetch(`${API}/api/create-payment-intent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount: state.promo ? state.promo.newTotal : total * 100,
+        amount: state.promo ? state.promo.newTotal : baseAmount,
+        baseAmount: baseAmount,
         description: `SDTV Reserve Filming — ${state.selectedUpcomingFestival?.name || 'Festival'}` + (state.promo ? ` (${state.promo.code})` : ''),
+        promoId: state.promo?.promoId || '',
         metadata: {
           ig: instagram, email, name,
           festival: state.selectedUpcomingFestival?.name || '',

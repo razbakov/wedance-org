@@ -1358,10 +1358,12 @@ app.post('/api/create-payment-intent', async (req, res) => {
         console.warn('Could not verify capture status, using base price:', e.message);
       }
     } else if (flow === 'preorder' || flow === 'visibility' || flow === 'upsell-feature') {
-      // Non-archive flows: accept client amount (validated by min/max bounds)
+      // Non-archive flows: accept client BASE amount (before promo)
+      // Promo re-validation below will apply discount server-side
       const clientAmount = parseInt(req.body.amount, 10);
       if (clientAmount && clientAmount >= 100 && clientAmount <= 100000) {
-        amount = clientAmount;
+        // If client already applied promo, use the pre-discount base instead
+        amount = promoId ? (parseInt(req.body.baseAmount, 10) || clientAmount) : clientAmount;
       }
     }
 
