@@ -761,6 +761,50 @@ if ('serviceWorker' in navigator) {
           <p class="slot-confirm-note">Free rescheduling until 24h before the event</p>
         </div>
 
+        <!-- Second dance upsell -->
+        <div class="upsell-second-dance" id="secondDanceUpsell" style="display:none;">
+          <div class="upsell-second-offer" id="secondDanceOffer">
+            <span class="upsell-second-emoji">💃</span>
+            <div class="upsell-second-text">
+              <div class="upsell-second-title">Want another dance filmed?</div>
+              <div class="upsell-second-desc">Different night, partner, or style · <strong>+€80</strong> <span style="color:var(--sdtv-green);">(save €20)</span></div>
+            </div>
+            <button class="btn-sm btn-outline" onclick="addSecondDance()">+ Add</button>
+          </div>
+        </div>
+
+        <!-- Second dance slot selection (hidden until added) -->
+        <div class="second-dance-slot" id="secondDanceSlot" style="display:none;">
+          <div class="slot-confirm-heading" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Dance 2 — pick your slot</span>
+            <button class="btn-ghost btn-xs" onclick="removeSecondDance()" style="color:var(--sdtv-red);font-size:11px;">Remove</button>
+          </div>
+          <div class="day-selector" id="daySelectorSecond"></div>
+          <div class="time-slots" id="timeSlotsSecond">
+            <div class="time-slots-inner">
+              <h3 class="slots-heading">Pick your time</h3>
+              <div class="slots-list" id="slotsListSecond"></div>
+            </div>
+          </div>
+          <div class="slot-selection-summary" id="slotSummarySecond" style="display:none;">
+            <div class="slot-confirm-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--sdtv-green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <div>
+                <div class="slot-confirm-day" id="slotConfirmDaySecond"></div>
+                <div class="slot-confirm-time" id="slotConfirmTimeSecond"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bundle summary (shown when 2 dances selected) -->
+        <div class="bundle-summary" id="bundleSummary" style="display:none;">
+          <div class="bundle-line"><span>Dance 1</span><span>€100</span></div>
+          <div class="bundle-line"><span>Dance 2</span><span>€80</span></div>
+          <div class="bundle-line bundle-save"><span>You save</span><span style="color:var(--sdtv-green);">€20</span></div>
+          <div class="bundle-line bundle-total"><span>Total</span><span id="bundleTotal">€180</span></div>
+        </div>
+
         <div class="slot-bottom-block">
           <div class="slot-skip" id="slotSkipWrap">
             <button class="btn-ghost btn-sm" onclick="skipSlotBooking()">
@@ -800,6 +844,14 @@ if ('serviceWorker' in navigator) {
           <div class="summary-row">
             <span id="summaryPackageName">Social Dance Video</span>
             <span id="summaryPackagePrice">€100</span>
+          </div>
+          <div class="summary-row" id="summarySecondDance" style="display:none;">
+            <span>Dance 2</span>
+            <span>€80</span>
+          </div>
+          <div class="summary-row" id="summarySavings" style="display:none;color:var(--sdtv-green);">
+            <span>Bundle savings</span>
+            <span>-€20</span>
           </div>
           <div class="summary-row" id="summaryCollab" style="display:none;">
             <span>Feature on SDTV Channel</span>

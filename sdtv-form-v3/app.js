@@ -504,6 +504,8 @@ function resetForm() {
   state.contentReadiness = null;
   state.isEarlyBird = false;
   state.reservationRef = null;
+  state.secondDance = null;
+  state.festivalHasShow = false;
   state.walkupType = 'social';
   state.walkupPayment = 'later';
 
@@ -1666,9 +1668,30 @@ function selectUpcomingFestival(name, location, date, spots, airtableId) {
   const btn = document.getElementById('preorderFestivalNext');
   btn.disabled = false;
   btn.classList.remove('disabled');
+
+  // Pre-fetch sessions to know hasShow before package screen
+  if (airtableId) {
+    fetch(`${API}/api/sessions?festivalId=${airtableId}`)
+      .then(r => r.json())
+      .then(data => {
+        state.sessions = data.sessions || [];
+        state.festivalHasShow = data.hasShow || false;
+      })
+      .catch(() => { state.festivalHasShow = false; });
+  }
 }
 
 function goToPreorderPackage() {
+  // Hide/show Show Video based on festival data
+  const showCard = document.querySelector('.package-card[onclick*="show"]');
+  if (showCard) showCard.style.display = state.festivalHasShow ? '' : 'none';
+  // If Show was selected but not available, reset to Social
+  if (!state.festivalHasShow && state.selectedPackage?.type === 'show') {
+    state.selectedPackage = { type: 'social', price: 100 };
+    document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+    const socialCard = document.querySelector('.package-card[onclick*="social"]');
+    if (socialCard) socialCard.classList.add('selected');
+  }
   showScreen('preorder-package');
   updateTotal();
 }
@@ -1736,9 +1759,14 @@ async function goToPreorderSlot() {
       const res = await fetch(`${API}/api/sessions?festivalId=${festivalId}`);
       const data = await res.json();
       state.sessions = data.sessions || [];
-      // Group by dayLabel
+      state.festivalHasShow = data.hasShow || false;
+      // Group by dayLabel, filter by selected package type
       state.sessionsByDay = {};
+      const pkgType = state.selectedPackage?.type || 'social';
       for (const s of state.sessions) {
+        // Filter: social package → exclude Show sessions; show package → only Show
+        if (pkgType === 'show' && s.type !== 'Show') continue;
+        if (pkgType !== 'show' && s.type === 'Show') continue;
         if (!state.sessionsByDay[s.dayLabel]) state.sessionsByDay[s.dayLabel] = [];
         state.sessionsByDay[s.dayLabel].push(s);
       }
@@ -1887,6 +1915,11 @@ function selectSession(sessionId) {
 
   const slotNextBtn = document.getElementById('slotNextBtn');
   if (slotNextBtn) { slotNextBtn.disabled = false; slotNextBtn.classList.remove('disabled'); }
+
+  // Show second-dance upsell if not already added
+  if (!state.secondDance) {
+    showSecondDanceUpsell();
+  }
 }
 
 function skipSlotBooking() {
@@ -1903,6 +1936,161 @@ function skipSlotBooking() {
 }
 
 // ==========================================
+// SECOND DANCE UPSELL
+// ==========================================
+const SECOND_DANCE_PRICE = 8000; // €80 in cents (save €20)
+const SECOND_DANCE_SAVINGS = 2000; // €20
+
+function showSecondDanceUpsell() {
+  const el = document.getElementById('secondDanceUpsell');
+  if (el) el.style.display = '';
+}
+
+function addSecondDance() {
+  state.secondDance = { day: null, slot: null };
+  haptic('medium');
+
+  // Hide offer, show slot picker
+  const offer = document.getElementById('secondDanceOffer');
+  const slotEl = document.getElementById('secondDanceSlot');
+  const upsellEl = document.getElementById('secondDanceUpsell');
+  if (offer) upsellEl.style.display = 'none';
+  if (slotEl) slotEl.style.display = '';
+
+  // Render day selector for second dance (reuse same session data)
+  renderSecondDaySelector();
+
+  // Update CTA
+  updateSlotCta();
+}
+
+function removeSecondDance() {
+  state.secondDance = null;
+
+  const slotEl = document.getElementById('secondDanceSlot');
+  const bundleEl = document.getElementById('bundleSummary');
+  if (slotEl) slotEl.style.display = 'none';
+  if (bundleEl) bundleEl.style.display = 'none';
+
+  // Show upsell offer again
+  const upsellEl = document.getElementById('secondDanceUpsell');
+  if (upsellEl) upsellEl.style.display = '';
+
+  updateSlotCta();
+}
+
+function renderSecondDaySelector() {
+  const container = document.getElementById('daySelectorSecond');
+  if (!container) return;
+
+  const dayLabels = Object.keys(state.sessionsByDay);
+  container.innerHTML = dayLabels.map(dayLabel => {
+    const parts = dayLabel.split(' ');
+    const weekday = parts[0] || '';
+    const month = parts[1] || '';
+    const date = parts[2] || '';
+    const isSelected = state.secondDance?.day === dayLabel;
+    return `
+      <button class="day-card ${isSelected ? 'selected' : ''}"
+              data-day="${dayLabel}"
+              onclick="selectSecondDay('${dayLabel}')">
+        <span class="day-card-weekday">${weekday}</span>
+        <span class="day-card-date">${date}</span>
+        <span class="day-card-month">${month}</span>
+      </button>
+    `;
+  }).join('');
+}
+
+function selectSecondDay(dayLabel) {
+  if (!state.secondDance) state.secondDance = {};
+  state.secondDance.day = dayLabel;
+  state.secondDance.slot = null;
+
+  // Update day card selection
+  document.querySelectorAll('#daySelectorSecond .day-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.day === dayLabel);
+  });
+
+  // Show time slots for this day
+  const timeSlotsEl = document.getElementById('timeSlotsSecond');
+  if (timeSlotsEl) timeSlotsEl.classList.add('visible');
+
+  const summaryEl = document.getElementById('slotSummarySecond');
+  if (summaryEl) summaryEl.style.display = 'none';
+
+  const daySessions = state.sessionsByDay[dayLabel] || [];
+  const slotsList = document.getElementById('slotsListSecond');
+  if (slotsList) {
+    slotsList.innerHTML = daySessions.map(s => {
+      const badge = getSessionBadge(s);
+      const disabled = !s.isBookable;
+      return `
+        <button class="slot-card ${disabled ? 'disabled' : ''}"
+                ${disabled ? 'disabled' : `onclick="selectSecondSession('${s.id}')"`}>
+          <span class="slot-card-label">${s.label}</span>
+          <span class="slot-card-time">${s.timeStart}–${s.timeEnd}</span>
+          <span class="slot-card-desc">${s.desc}</span>
+          ${badge.text ? `<span class="slot-card-avail slot-avail-${badge.cls}">${badge.text}</span>` : ''}
+        </button>
+      `;
+    }).join('');
+  }
+}
+
+function selectSecondSession(sessionId) {
+  const session = state.sessions.find(s => s.id === sessionId);
+  if (!session || !session.isBookable) return;
+  if (!state.secondDance) state.secondDance = {};
+  state.secondDance.slot = session;
+  haptic('medium');
+
+  // Update card selection
+  document.querySelectorAll('#slotsListSecond .slot-card').forEach(c => c.classList.remove('selected'));
+  const daySessions = state.sessionsByDay[state.secondDance.day] || [];
+  const idx = daySessions.findIndex(s => s.id === sessionId);
+  const cards = document.querySelectorAll('#slotsListSecond .slot-card');
+  if (idx >= 0 && cards[idx]) cards[idx].classList.add('selected');
+
+  // Show second summary
+  const summaryEl = document.getElementById('slotSummarySecond');
+  if (summaryEl) summaryEl.style.display = '';
+  const dayEl = document.getElementById('slotConfirmDaySecond');
+  const timeEl = document.getElementById('slotConfirmTimeSecond');
+  if (dayEl) dayEl.textContent = state.secondDance.day;
+  if (timeEl) timeEl.textContent = session.label + ' · ' + session.timeStart + '–' + session.timeEnd;
+
+  // Show bundle summary
+  const bundleEl = document.getElementById('bundleSummary');
+  if (bundleEl) bundleEl.style.display = '';
+
+  updateSlotCta();
+}
+
+function updateSlotCta() {
+  const ctaText = document.getElementById('slotCtaText');
+  const ctaHint = document.getElementById('slotCtaHint');
+  const slotNextBtn = document.getElementById('slotNextBtn');
+
+  if (state.secondDance && !state.secondDance.slot) {
+    // Second dance added but slot not yet selected
+    if (ctaText) ctaText.textContent = 'Pick a slot for Dance 2';
+    if (slotNextBtn) { slotNextBtn.disabled = true; slotNextBtn.classList.add('disabled'); }
+    if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = '2 dances · select slot for Dance 2'; }
+  } else if (state.secondDance?.slot && state.selectedSlot) {
+    // Both selected
+    if (ctaText) ctaText.textContent = 'Continue with 2 Dances';
+    if (slotNextBtn) { slotNextBtn.disabled = false; slotNextBtn.classList.remove('disabled'); }
+    if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = '2 dances · €180 (save €20)'; }
+  } else if (state.selectedSlot) {
+    // Only first dance
+    if (ctaText) ctaText.textContent = 'Continue with This Slot';
+    if (slotNextBtn) { slotNextBtn.disabled = false; slotNextBtn.classList.remove('disabled'); }
+    if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = '1 filming slot selected'; }
+  }
+}
+
+// ==========================================
 // PRE-ORDER FLOW — CHECKOUT
 // ==========================================
 function goToPreorderCheckout() {
@@ -1912,8 +2100,26 @@ function goToPreorderCheckout() {
   }
 
   const packageName = state.selectedPackage.type === 'social' ? 'Social Dance Video' : 'Show Video';
-  document.getElementById('summaryPackageName').textContent = packageName;
+  const hasSecond = state.secondDance?.slot;
+  document.getElementById('summaryPackageName').textContent = hasSecond ? 'Dance 1: ' + packageName : packageName;
   document.getElementById('summaryPackagePrice').textContent = '€' + state.selectedPackage.price;
+
+  // Second dance line in summary
+  const secondLine = document.getElementById('summarySecondDance');
+  if (secondLine) {
+    if (hasSecond) {
+      secondLine.style.display = 'flex';
+      secondLine.innerHTML = `<span>Dance 2: ${packageName}</span><span>€80</span>`;
+    } else {
+      secondLine.style.display = 'none';
+    }
+  }
+
+  // Bundle savings line
+  const savingsLine = document.getElementById('summarySavings');
+  if (savingsLine) {
+    savingsLine.style.display = hasSecond ? 'flex' : 'none';
+  }
 
   const collabLine = document.getElementById('summaryCollab');
   collabLine.style.display = state.collabAddon ? 'flex' : 'none';
@@ -1922,13 +2128,18 @@ function goToPreorderCheckout() {
   const summarySlotText = document.getElementById('summarySlotText');
   if (summarySlotText) {
     if (state.selectedSlot && state.selectedDay) {
-      summarySlotText.textContent = 'Filming: ' + state.selectedDay + ', ' + state.selectedSlot.label;
+      let slotText = 'Dance 1: ' + state.selectedDay + ', ' + state.selectedSlot.label;
+      if (hasSecond) {
+        slotText += '\nDance 2: ' + state.secondDance.day + ', ' + state.secondDance.slot.label;
+      }
+      summarySlotText.textContent = slotText;
     } else {
       summarySlotText.textContent = 'Filming: TBD (we\'ll send a link)';
     }
   }
 
-  const total = state.selectedPackage.price + (state.collabAddon ? 100 : 0);
+  const secondDanceAmount = hasSecond ? 80 : 0;
+  const total = state.selectedPackage.price + secondDanceAmount + (state.collabAddon ? 100 : 0);
   document.getElementById('summaryTotal').textContent = '€' + total;
   document.getElementById('checkoutTotal').textContent = '€' + total;
   const applePayTotal = document.getElementById('applePayTotal');
@@ -2071,7 +2282,12 @@ function populateFilmingPass() {
   }
   if (passSlot) {
     if (state.selectedSlot?.label && state.selectedDay) {
-      passSlot.textContent = state.selectedDay + ' · ' + state.selectedSlot.label + ' (' + state.selectedSlot.timeStart + '–' + state.selectedSlot.timeEnd + ')';
+      let slotText = 'Dance 1: ' + state.selectedDay + ' · ' + state.selectedSlot.label + ' (' + state.selectedSlot.timeStart + '–' + state.selectedSlot.timeEnd + ')';
+      if (state.secondDance?.slot) {
+        slotText += '\nDance 2: ' + state.secondDance.day + ' · ' + state.secondDance.slot.label + ' (' + state.secondDance.slot.timeStart + '–' + state.secondDance.slot.timeEnd + ')';
+      }
+      passSlot.textContent = slotText;
+      passSlot.style.whiteSpace = 'pre-line';
     } else {
       passSlot.textContent = 'Filming slot: TBD';
     }
@@ -3119,7 +3335,8 @@ async function processPreorderPayment() {
   if (name.length < 2) { shakeElement(document.getElementById('preorderName')); return; }
   if (!isValidEmail(email)) { const el = document.getElementById('preorderEmail'); el.focus(); el.classList.add('error'); shakeElement(el); return; }
 
-  const total = state.selectedPackage.price + (state.collabAddon ? 100 : 0);
+  const secondDanceAmount = state.secondDance?.slot ? 80 : 0;
+  const total = state.selectedPackage.price + secondDanceAmount + (state.collabAddon ? 100 : 0);
   const btn = document.getElementById('preorderCheckoutBtn');
   const originalText = btn.innerHTML;
   btn.innerHTML = '<span class="searching-spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;"></span> Processing...';
@@ -3127,21 +3344,25 @@ async function processPreorderPayment() {
 
   try {
     const baseAmount = total * 100;
+    const danceCount = state.secondDance?.slot ? 2 : 1;
     const piRes = await fetch(`${API}/api/create-payment-intent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amount: state.promo ? state.promo.newTotal : baseAmount,
         baseAmount: baseAmount,
-        description: `SDTV Reserve Filming — ${state.selectedUpcomingFestival?.name || 'Festival'}` + (state.promo ? ` (${state.promo.code})` : ''),
+        description: `SDTV Reserve Filming${danceCount > 1 ? ' (2 dances)' : ''} — ${state.selectedUpcomingFestival?.name || 'Festival'}` + (state.promo ? ` (${state.promo.code})` : ''),
         promoId: state.promo?.promoId || '',
         metadata: {
           ig: instagram, email, name,
           festival: state.selectedUpcomingFestival?.name || '',
           package: state.selectedPackage?.type || '',
+          dances: String(danceCount),
           collab: state.collabAddon ? 'yes' : 'no',
           day: state.selectedDay || '',
           slot: state.selectedSlot?.label || '',
+          day2: state.secondDance?.day || '',
+          slot2: state.secondDance?.slot?.label || '',
           flow: 'preorder',
         }
       })
@@ -3164,6 +3385,11 @@ async function processPreorderPayment() {
     }
 
     if (paymentIntent.status === 'succeeded') {
+      // Create reservation(s)
+      const dance2 = state.secondDance?.slot;
+      const notes = [];
+      if (state.selectedSlot) notes.push(`Dance 1: ${state.selectedDay}, ${state.selectedSlot.label}`);
+      if (dance2) notes.push(`Dance 2: ${state.secondDance.day}, ${dance2.label} (€80 bundle)`);
       try {
         const resRes = await fetch(`${API}/api/reservations`, {
           method: 'POST',
@@ -3174,13 +3400,31 @@ async function processPreorderPayment() {
             sessionId: state.selectedSlot?.id || '',
             day: state.selectedDay || '', style: '',
             ig: instagram, email, name,
-            package: state.selectedPackage?.type === 'pro' ? 'Pro Package' : 'Social Dance',
-            notes: state.selectedSlot ? `Slot: ${state.selectedSlot.label}` : 'Flexible timing',
+            package: dance2 ? 'Bundle (2 dances)' : (state.selectedPackage?.type === 'show' ? 'Show Video' : 'Social Dance'),
+            notes: notes.join('\n') || 'Flexible timing',
           })
         });
         const resData = await resRes.json();
         if (resData.ref) state.reservationRef = resData.ref;
       } catch (e) { console.error('Reservation save error:', e); }
+      // Create second reservation if bundle
+      if (dance2) {
+        try {
+          await fetch(`${API}/api/reservations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              festival: state.selectedUpcomingFestival?.name || '',
+              festivalId: state.selectedUpcomingFestival?.airtableId || '',
+              sessionId: dance2.id || '',
+              day: state.secondDance.day || '', style: '',
+              ig: instagram, email, name,
+              package: state.selectedPackage?.type === 'show' ? 'Show Video' : 'Social Dance',
+              notes: `Dance 2 of bundle (ref: ${state.reservationRef || 'TBD'})`,
+            })
+          });
+        } catch (e) { console.error('Second reservation error:', e); }
+      }
 
       // Send booking confirmation + receipt emails
       const festName = state.selectedUpcomingFestival?.name || '';

@@ -818,6 +818,7 @@ app.get('/api/sessions', async (req, res) => {
         id: s.id,
         festivalId,
         label: f['Session Name'] || '',
+        type: f['Session Type'] || 'Social',
         day: f.Day || '',
         dayLabel,
         timeStart: f['Time Start'] || '',
@@ -832,7 +833,8 @@ app.get('/api/sessions', async (req, res) => {
       };
     });
 
-    const response = { sessions: result };
+    const hasShow = result.some(s => s.type === 'Show');
+    const response = { sessions: result, hasShow };
     sessionCache[cacheKey] = { data: response, ts: now };
     res.json(response);
   } catch (e) {
