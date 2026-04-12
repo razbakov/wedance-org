@@ -806,7 +806,7 @@ app.get('/api/sessions', async (req, res) => {
       const booked = bookedMap[s.id] || 0;
       const spotsLeft = Math.max(0, capacity - booked);
       const status = f.Status || 'Open';
-      const isBookable = (status === 'Open' || status === 'Few Spots') && spotsLeft > 0;
+      const isBookable = (status === 'Open' || status === 'Active' || status === 'Few Spots') && spotsLeft > 0;
 
       // Build day label from date
       const d = f.Day ? new Date(f.Day + 'T12:00:00') : null;
