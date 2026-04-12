@@ -2042,6 +2042,7 @@ function populateFilmingPass() {
   const passEventName = document.getElementById('passEventName');
   const passDate = document.getElementById('passDate');
   const passSlot = document.getElementById('passSlot');
+  const passQr = document.querySelector('.qr-placeholder');
 
   if (passEventName && state.selectedUpcomingFestival) {
     passEventName.textContent = state.selectedUpcomingFestival.name;
@@ -2055,6 +2056,15 @@ function populateFilmingPass() {
     } else {
       passSlot.textContent = 'Filming slot: TBD';
     }
+  }
+
+  // Replace QR placeholder with real QR + link to pass page
+  if (passQr && state.reservationRef) {
+    const passUrl = `${window.location.origin}/pass/${state.reservationRef}`;
+    passQr.innerHTML = `<a href="${passUrl}" target="_blank" style="display:block;text-align:center;">
+      <img src="${API}/api/qr?data=${encodeURIComponent(passUrl)}" alt="Filming Pass QR" style="width:120px;height:120px;border-radius:8px;">
+      <div style="margin-top:8px;font-size:11px;color:var(--sdtv-text-faint);">Tap to open your Filming Pass</div>
+    </a>`;
   }
 }
 
@@ -3129,17 +3139,21 @@ async function processPreorderPayment() {
 
     if (paymentIntent.status === 'succeeded') {
       try {
-        await fetch(`${API}/api/reservations`, {
+        const resRes = await fetch(`${API}/api/reservations`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             festival: state.selectedUpcomingFestival?.name || '',
+            festivalId: state.selectedUpcomingFestival?.airtableId || '',
+            sessionId: state.selectedSlot?.id || '',
             day: state.selectedDay || '', style: '',
             ig: instagram, email, name,
             package: state.selectedPackage?.type === 'pro' ? 'Pro Package' : 'Social Dance',
             notes: state.selectedSlot ? `Slot: ${state.selectedSlot.label}` : 'Flexible timing',
           })
         });
+        const resData = await resRes.json();
+        if (resData.ref) state.reservationRef = resData.ref;
       } catch (e) { console.error('Reservation save error:', e); }
 
       // Send booking confirmation + receipt emails

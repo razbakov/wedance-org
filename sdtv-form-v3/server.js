@@ -1673,6 +1673,165 @@ app.get('/delivery', async (req, res) => {
   }
 });
 
+// ── GET /api/qr?data=URL ──────────────────────────────
+// Generate QR code as PNG image
+const QRCode = require('qrcode');
+app.get('/api/qr', async (req, res) => {
+  const data = req.query.data;
+  if (!data) return res.status(400).send('data param required');
+  try {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    await QRCode.toFileStream(res, data, { width: 300, margin: 2, color: { dark: '#f4f1ec', light: '#00000000' } });
+  } catch (e) {
+    res.status(500).send('QR generation failed');
+  }
+});
+
+// ── GET /api/reservation/:ref ─────────────────────────
+// Fetch reservation by RSV-xxx ref for pass page and capture pre-fill
+app.get('/api/reservation/:ref', async (req, res) => {
+  try {
+    const ref = req.params.ref;
+    if (!ref) return res.status(400).json({ error: 'Reservation ref required' });
+
+    const formula = encodeURIComponent(`{Reservation ID}="${sanitizeForFormula(ref)}"`);
+    const data = await airtableFetch(`${TABLES.reservations}?filterByFormula=${formula}`);
+    const record = (data.records || [])[0];
+    if (!record) return res.status(404).json({ error: 'Reservation not found' });
+
+    const f = record.fields || {};
+    res.json({
+      id: record.id,
+      ref: f['Reservation ID'] || ref,
+      festival: f['Festival'] || '',
+      day: f['Day'] || '',
+      ig: f['Instagram'] || '',
+      email: f['Email'] || '',
+      name: f['Name'] || '',
+      package: f['Package'] || '',
+      status: f['Booking Status'] || f['Status'] || '',
+      notes: f['Notes'] || '',
+      session: Array.isArray(f['Session']) ? f['Session'][0] : '',
+    });
+  } catch (e) {
+    console.error('Reservation lookup error:', e.message);
+    res.status(500).json({ error: 'Lookup failed' });
+  }
+});
+
+// ── GET /pass/:ref ────────────────────────────────────
+// Branded Filming Pass page with real QR code
+app.get('/pass/:ref', async (req, res) => {
+  const ref = req.params.ref;
+  if (!ref || !ref.startsWith('RSV')) {
+    return res.status(400).send('Invalid pass link');
+  }
+
+  try {
+    const formula = encodeURIComponent(`{Reservation ID}="${sanitizeForFormula(ref)}"`);
+    const data = await airtableFetch(`${TABLES.reservations}?filterByFormula=${formula}`);
+    const record = (data.records || [])[0];
+    if (!record) return res.status(404).send('Booking not found');
+
+    const f = record.fields || {};
+    const festival = f['Festival'] || 'Festival';
+    const day = f['Day'] || '';
+    const name = f['Name'] || '';
+    const ig = f['Instagram'] || '';
+    const pkg = f['Package'] || '';
+    const status = f['Booking Status'] || 'Confirmed';
+    const notes = f['Notes'] || '';
+
+    const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const captureUrl = `${baseUrl}/?res=${encodeURIComponent(ref)}`;
+
+    // Generate QR as data URL
+    const qrDataUrl = await QRCode.toDataURL(captureUrl, {
+      width: 200, margin: 2,
+      color: { dark: '#f4f1ec', light: '#00000000' }
+    });
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filming Pass — ${esc(festival)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0c0c0e; --surface: #161618; --border: rgba(255,255,255,0.08); --ivory: #f4f1ec; --muted: #8a8580; --faint: #5a5650; --red: #c1453b; --green: #4caf50; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ivory); font-family: 'Inter', sans-serif; min-height: 100dvh; display: flex; justify-content: center; padding: 24px 16px; }
+  .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
+  .pass { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+  .pass-top { padding: 24px 24px 16px; text-align: center; border-bottom: 1px dashed var(--border); }
+  .pass-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--red); text-transform: uppercase; margin-bottom: 12px; }
+  .pass-festival { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .pass-meta { font-size: 13px; color: var(--muted); }
+  .pass-qr { padding: 24px; display: flex; justify-content: center; background: var(--bg); }
+  .pass-qr img { width: 200px; height: 200px; }
+  .pass-details { padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .detail-row { display: flex; justify-content: space-between; align-items: center; }
+  .detail-label { font-size: 12px; color: var(--faint); }
+  .detail-value { font-size: 13px; font-weight: 600; }
+  .status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .status-confirmed { background: rgba(76,175,80,0.1); color: var(--green); }
+  .status-pending { background: rgba(251,192,45,0.1); color: #fbc02d; }
+  .pass-instruction { padding: 16px 24px 24px; text-align: center; font-size: 12px; color: var(--faint); line-height: 1.5; }
+  .logo { text-align: center; padding: 16px 0 8px; }
+  .logo img { width: 56px; height: 56px; border-radius: 12px; }
+  .footer { text-align: center; font-size: 11px; color: var(--faint); padding: 8px 0; }
+  .footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo"><img src="/logo.png" alt="SDTV"></div>
+
+  <div class="pass">
+    <div class="pass-top">
+      <div class="pass-badge">Filming Pass</div>
+      <div class="pass-festival">${esc(festival)}</div>
+      <div class="pass-meta">${esc([day, pkg].filter(Boolean).join(' · '))}</div>
+    </div>
+
+    <div class="pass-qr">
+      <img src="${qrDataUrl}" alt="Scan to check in">
+    </div>
+
+    <div class="pass-details">
+      ${name ? `<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${esc(name)}</span></div>` : ''}
+      ${ig ? `<div class="detail-row"><span class="detail-label">Instagram</span><span class="detail-value">${esc(ig)}</span></div>` : ''}
+      ${pkg ? `<div class="detail-row"><span class="detail-label">Package</span><span class="detail-value">${esc(pkg)}</span></div>` : ''}
+      ${day ? `<div class="detail-row"><span class="detail-label">Day</span><span class="detail-value">${esc(day)}</span></div>` : ''}
+      <div class="detail-row">
+        <span class="detail-label">Status</span>
+        <span class="status-badge ${status === 'Confirmed' ? 'status-confirmed' : 'status-pending'}">${status === 'Confirmed' ? '&#10003; Confirmed' : '&#9711; ' + esc(status)}</span>
+      </div>
+      ${notes ? `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${esc(notes)}</span></div>` : ''}
+    </div>
+
+    <div class="pass-instruction">
+      Show this pass to the SDTV filming team at the event.<br>
+      They will scan your QR code to check you in.
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Social Dance TV · <a href="https://instagram.com/socialdancetv" target="_blank">@socialdancetv</a></p>
+  </div>
+</div>
+</body>
+</html>`);
+  } catch (e) {
+    console.error('Pass page error:', e.message);
+    res.status(404).send('Booking not found. Check your link or contact us on Instagram @socialdancetv');
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`SDTV Client Form server running on port ${PORT}`);
 });
