@@ -1339,12 +1339,14 @@ app.post('/api/create-payment-intent', async (req, res) => {
   if (!stripe) return res.status(503).json({ error: 'Payments not configured' });
   try {
     const { captureId, currency, description, metadata, promoId } = req.body || {};
+    const flow = metadata?.flow || '';
 
-    // Determine price server-side based on capture status
+    // Determine price server-side
     let amount = SDTV_PRICING.base;
     let appliedCoupon = null;
 
     if (captureId) {
+      // Archive flow: price from capture status (server-authoritative)
       try {
         const capData = await airtableFetch(`${TABLES.captures}/${captureId}`);
         const status = capData.fields?.['Status'] || 'Captured';
@@ -1354,6 +1356,12 @@ app.post('/api/create-payment-intent', async (req, res) => {
         }
       } catch (e) {
         console.warn('Could not verify capture status, using base price:', e.message);
+      }
+    } else if (flow === 'preorder' || flow === 'visibility' || flow === 'upsell-feature') {
+      // Non-archive flows: accept client amount (validated by min/max bounds)
+      const clientAmount = parseInt(req.body.amount, 10);
+      if (clientAmount && clientAmount >= 100 && clientAmount <= 100000) {
+        amount = clientAmount;
       }
     }
 

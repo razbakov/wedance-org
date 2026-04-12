@@ -459,6 +459,21 @@ function showScreen(screenId, addToHistory = true) {
   // (doTransition sets it too, but async via View Transitions API)
   state.currentScreen = screenId;
   updateProgressBar();
+
+  // Run registered post-navigation hooks
+  const hooks = screenHooks[screenId];
+  if (hooks) hooks.forEach(fn => setTimeout(fn, 50));
+}
+
+/**
+ * Screen hook registry — replaces fragile showScreen override chain.
+ * Register a callback to run after a screen is shown.
+ * @type {Object<string, Function[]>}
+ */
+const screenHooks = {};
+function onScreen(screenId, fn) {
+  if (!screenHooks[screenId]) screenHooks[screenId] = [];
+  screenHooks[screenId].push(fn);
 }
 
 function goBack() {
@@ -2922,34 +2937,28 @@ function mountStripeCard(containerId, errorsId) {
 }
 
 // Mount Stripe card elements when checkout screens become visible
-const _origShowScreen = showScreen;
-showScreen = function(id, ...args) {
-  _origShowScreen(id, ...args);
-  if (id === 'archive-checkout' && !stripeElements.archive) {
-    setTimeout(() => {
-      stripeElements.archive = mountStripeCard('archiveCardElement', 'archiveCardErrors');
-      // Enable Pay button when card is complete
-      if (stripeElements.archive) {
-        stripeElements.archive.on('change', (e) => {
-          const email = document.getElementById('archiveCheckoutEmail')?.value.trim();
-          const btn = document.getElementById('archiveCheckoutBtn');
-          btn.disabled = !e.complete || !isValidEmail(email || '');
-          btn.classList.toggle('disabled', btn.disabled);
-        });
-      }
-    }, 100);
+// Stripe card mount hooks
+onScreen('archive-checkout', () => {
+  if (!stripeElements.archive) {
+    stripeElements.archive = mountStripeCard('archiveCardElement', 'archiveCardErrors');
+    if (stripeElements.archive) {
+      stripeElements.archive.on('change', (e) => {
+        const email = document.getElementById('archiveCheckoutEmail')?.value.trim();
+        const btn = document.getElementById('archiveCheckoutBtn');
+        btn.disabled = !e.complete || !isValidEmail(email || '');
+        btn.classList.toggle('disabled', btn.disabled);
+      });
+    }
   }
-  if (id === 'preorder-checkout' && !stripeElements.preorder) {
-    setTimeout(() => {
-      stripeElements.preorder = mountStripeCard('preorderCardElement', 'preorderCardErrors');
-      if (stripeElements.preorder) {
-        stripeElements.preorder.on('change', (e) => {
-          validatePreorderCheckout();
-        });
-      }
-    }, 100);
+});
+onScreen('preorder-checkout', () => {
+  if (!stripeElements.preorder) {
+    stripeElements.preorder = mountStripeCard('preorderCardElement', 'preorderCardErrors');
+    if (stripeElements.preorder) {
+      stripeElements.preorder.on('change', () => validatePreorderCheckout());
+    }
   }
-};
+});
 
 // Archive: real Stripe payment
 async function processArchivePayment() {
@@ -3382,16 +3391,9 @@ function updateCheckoutTotal(flow) {
 }
 
 // Hook into showScreen to auto-apply pending promo
-const _origShowScreenPromo = showScreen;
-showScreen = function(id, ...args) {
-  _origShowScreenPromo(id, ...args);
-  if (id === 'archive-checkout' && state.pendingPromo) {
-    setTimeout(() => autoApplyPromo('archive'), 300);
-  }
-  if (id === 'preorder-checkout' && state.pendingPromo) {
-    setTimeout(() => autoApplyPromo('preorder'), 300);
-  }
-};
+// Promo auto-apply hooks
+onScreen('archive-checkout', () => { if (state.pendingPromo) setTimeout(() => autoApplyPromo('archive'), 250); });
+onScreen('preorder-checkout', () => { if (state.pendingPromo) setTimeout(() => autoApplyPromo('preorder'), 250); });
 
 // ==========================================
 // UPSELL: INLINE STRIPE CHECKOUT
@@ -3523,28 +3525,20 @@ function showArchiveEmailField() {
   document.getElementById('archiveCheckoutEmail').focus();
 }
 
-// Hook into showScreen to set up email + IG pre-fill on checkout
-const _origShowScreenEmail = showScreen;
-showScreen = function(id, ...args) {
-  _origShowScreenEmail(id, ...args);
-  if (id === 'archive-checkout') {
-    setTimeout(setupArchiveCheckoutEmail, 50);
-  }
-  // Pre-fill IG from URL/state on checkout screens
+// Email + IG pre-fill hooks
+onScreen('archive-checkout', setupArchiveCheckoutEmail);
+onScreen('preorder-checkout', () => {
   if (state.dancerIdentity) {
-    const igMap = {
-      'preorder-checkout': 'preorderInstagram',
-      'visibility-checkout': 'visInstagram',
-    };
-    const fieldId = igMap[id];
-    if (fieldId) {
-      setTimeout(() => {
-        const f = document.getElementById(fieldId);
-        if (f && !f.value) f.value = state.dancerIdentity;
-      }, 50);
-    }
+    const f = document.getElementById('preorderInstagram');
+    if (f && !f.value) f.value = state.dancerIdentity;
   }
-};
+});
+onScreen('visibility-checkout', () => {
+  if (state.dancerIdentity) {
+    const f = document.getElementById('visInstagram');
+    if (f && !f.value) f.value = state.dancerIdentity;
+  }
+});
 
 // ==========================================
 // UNLOCK SCREEN: EMAIL AUTO-FILL
@@ -3575,13 +3569,8 @@ function showUnlockEmailField() {
 }
 
 // Hook into showScreen
-const _origShowScreenUnlock = showScreen;
-showScreen = function(id, ...args) {
-  _origShowScreenUnlock(id, ...args);
-  if (id === 'archive-unlock') {
-    setTimeout(setupUnlockEmail, 50);
-  }
-};
+// Unlock email auto-fill hook
+onScreen('archive-unlock', setupUnlockEmail);
 
 // ==========================================
 // NEW UNLOCK SCREEN: STRIPE + APPLE PAY
@@ -3819,13 +3808,8 @@ async function processUnlockPayment() {
 // (Old override removed — confirmArchiveMatch now handles multi-clip natively)
 
 // Hook into showScreen for unlock setup
-const _origShowScreenUnlockNew = showScreen;
-showScreen = function(id, ...args) {
-  _origShowScreenUnlockNew(id, ...args);
-  if (id === 'archive-unlock') {
-    setTimeout(setupUnlockScreen, 50);
-  }
-};
+// Unlock Stripe + Apple Pay setup hook
+onScreen('archive-unlock', setupUnlockScreen);
 
 // ==========================================
 // PROTECTED VIDEO PREVIEW (5-SEC LIMIT)
@@ -4008,10 +3992,6 @@ function shareWithPartner() {
 }
 
 // Hook into showScreen
-const _origShowScreenPartner = showScreen;
-showScreen = function(id, ...args) {
-  _origShowScreenPartner(id, ...args);
-  if (id === 'archive-unlock' || id === 'archive-confirmation') {
-    setTimeout(setupPartnerShare, 100);
-  }
-};
+// Partner share hooks
+onScreen('archive-unlock', setupPartnerShare);
+onScreen('archive-confirmation', setupPartnerShare);
