@@ -1951,13 +1951,18 @@ function addSecondDance() {
   haptic('medium');
 
   // Hide offer, show slot picker
-  const offer = document.getElementById('secondDanceOffer');
-  const slotEl = document.getElementById('secondDanceSlot');
   const upsellEl = document.getElementById('secondDanceUpsell');
-  if (offer) upsellEl.style.display = 'none';
+  const slotEl = document.getElementById('secondDanceSlot');
+  if (upsellEl) upsellEl.style.display = 'none';
   if (slotEl) slotEl.style.display = '';
 
-  // Render day selector for second dance (reuse same session data)
+  // Hide time slots until day is selected
+  const timeSlotsEl = document.getElementById('timeSlotsSecond');
+  if (timeSlotsEl) timeSlotsEl.classList.remove('visible');
+  const summaryEl = document.getElementById('slotSummarySecond');
+  if (summaryEl) summaryEl.style.display = 'none';
+
+  // Render day selector for second dance
   renderSecondDaySelector();
 
   // Update CTA
@@ -2041,7 +2046,7 @@ function selectSecondDay(dayLabel) {
 function selectSecondSession(sessionId) {
   const session = state.sessions.find(s => s.id === sessionId);
   if (!session || !session.isBookable) return;
-  if (!state.secondDance) state.secondDance = {};
+  if (!state.secondDance || !state.secondDance.day) return; // must select day first
   state.secondDance.slot = session;
   haptic('medium');
 
@@ -2072,12 +2077,13 @@ function updateSlotCta() {
   const ctaHint = document.getElementById('slotCtaHint');
   const slotNextBtn = document.getElementById('slotNextBtn');
 
-  if (state.secondDance && !state.secondDance.slot) {
-    // Second dance added but slot not yet selected
-    if (ctaText) ctaText.textContent = 'Pick a slot for Dance 2';
+  if (state.secondDance && (!state.secondDance.day || !state.secondDance.slot)) {
+    // Second dance added but day/slot not yet selected
+    const msg = !state.secondDance.day ? 'Pick a day for Dance 2' : 'Pick a slot for Dance 2';
+    if (ctaText) ctaText.textContent = msg;
     if (slotNextBtn) { slotNextBtn.disabled = true; slotNextBtn.classList.add('disabled'); }
-    if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = '2 dances · select slot for Dance 2'; }
-  } else if (state.secondDance?.slot && state.selectedSlot) {
+    if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = '2 dances · select day & slot for Dance 2'; }
+  } else if (state.secondDance?.slot && state.secondDance?.day && state.selectedSlot) {
     // Both selected
     if (ctaText) ctaText.textContent = 'Continue with 2 Dances';
     if (slotNextBtn) { slotNextBtn.disabled = false; slotNextBtn.classList.remove('disabled'); }
