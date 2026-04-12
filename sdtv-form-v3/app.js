@@ -907,6 +907,7 @@ async function searchArchive() {
 
     if (ready.length > 0) {
       // Has ready clips — show preview (may also include not-ready ones)
+      haptic('heavy');
       state.selectedClips = [];
       populateClipList([...ready, ...notReady], ig);
       showScreen('archive-preview');
@@ -2513,6 +2514,7 @@ async function checkVideoStatus() {
     const notReady = results.filter(r => r.status === 'Captured' || r.status === 'Processing' || r.status === 'Waitlisted');
 
     if (ready.length > 0) {
+      haptic('heavy');
       state.selectedClips = [];
       populateClipList([...ready, ...notReady], person.ig.replace('@', ''));
       showScreen('archive-preview');
