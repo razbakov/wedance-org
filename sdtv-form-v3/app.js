@@ -2178,7 +2178,12 @@ function selectSecondDay(dayLabel) {
 function selectSecondSession(sessionId) {
   const session = state.sessions.find(s => s.id === sessionId);
   if (!session || !session.isBookable) return;
-  if (!state.secondDance || !state.secondDance.day) return; // must select day first
+  if (!state.secondDance || !state.secondDance.day) return;
+  // Prevent same slot as Dance 1
+  if (state.selectedSlot?.id === sessionId) {
+    showToast('This slot is already selected for Dance 1. Pick a different one.');
+    return;
+  }
   state.secondDance.slot = session;
   haptic('medium');
 
