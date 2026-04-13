@@ -146,9 +146,11 @@ document.addEventListener('click', (e) => {
 // ==========================================
 
 /**
- * @typedef {'archive'|'preorder'|'visibility'|'notsure'|'walkup'|'status'} FlowType
- * @typedef {'social'|'show'|'both'} DanceType
+ * @typedef {'archive'|'preorder'|'visibility'|'notsure'|'walkup'|'status'|'monday'} FlowType
+ * @typedef {'social'|'show'} DanceType
  * @typedef {'later'|'now'} PaymentTiming
+ * @typedef {'momentum'|'recognition'|'feature'|'event-1x'|'event-2x'} VisibilityPlanType
+ * @typedef {'have-content'|'need-help'|'hybrid'} ContentReadiness
  *
  * @typedef {Object} Festival
  * @property {string} name
@@ -156,9 +158,26 @@ document.addEventListener('click', (e) => {
  * @property {string} date
  * @property {string} year
  * @property {string} emoji
+ * @property {string} [logo]
  * @property {string} [airtableId]
  * @property {boolean} [isLive]
  * @property {string} [status]
+ * @property {string[]} [days]
+ *
+ * @typedef {Object} Session
+ * @property {string} id
+ * @property {string} label
+ * @property {string} type — 'Social' or 'Show'
+ * @property {string} day
+ * @property {string} dayLabel
+ * @property {string} timeStart
+ * @property {string} timeEnd
+ * @property {string} desc
+ * @property {string} status
+ * @property {number} capacity
+ * @property {number} booked
+ * @property {number} spotsLeft
+ * @property {boolean} isBookable
  *
  * @typedef {Object} Capture
  * @property {string} id — Airtable record ID
@@ -166,11 +185,30 @@ document.addEventListener('click', (e) => {
  * @property {string} videoTitle — e.g. "Rocio Calidonio & Ricky"
  * @property {string} session — e.g. "Friday"
  * @property {string} style — e.g. "Salsa"
- * @property {'Captured'|'Processing'|'Ready'|'Delivered'|'Waitlisted'} status
+ * @property {'Captured'|'Processing'|'Ready'|'Delivered'|'Waitlisted'|'Notified'} status
  * @property {string} previewUrl
  * @property {string} capturedAt
  * @property {{ig: string, name: string}} partner1
  * @property {{ig: string, name: string}} partner2
+ *
+ * @typedef {Object} SecondDance
+ * @property {string|null} day
+ * @property {Session|null} slot
+ *
+ * @typedef {Object} VisPlanData
+ * @property {string} name
+ * @property {string} price
+ * @property {string} total
+ * @property {string} terms
+ * @property {string} btn
+ * @property {string} title
+ *
+ * @typedef {Object} PromoData
+ * @property {string} code
+ * @property {number} discount — in cents
+ * @property {number} newTotal — in cents
+ * @property {string} promoId — Stripe promotion code ID
+ * @property {string} [description]
  */
 
 /** @type {{
@@ -189,19 +227,33 @@ document.addEventListener('click', (e) => {
  *   selectedClips: string[],
  *   knownEmail: string,
  *   knownName: string,
+ *   collectedEmail: string,
+ *   urlSource: string,
  *   selectedUpcomingFestival: Festival|null,
  *   selectedPackage: {type: DanceType, price: number},
  *   collabAddon: boolean,
  *   selectedDay: string|null,
- *   selectedSlot: string|null,
+ *   selectedSlot: Session|null,
  *   slotSkipped: boolean,
+ *   secondDance: SecondDance|null,
+ *   festivalHasShow: boolean,
+ *   sessions: Session[],
+ *   sessionsByDay: Object<string, Session[]>,
+ *   reservationRef: string|null,
+ *   isEarlyBird: boolean,
  *   visibilityOutcome: string|null,
- *   visibilityPlan: string|null,
+ *   visibilityPlan: VisibilityPlanType|null,
+ *   visPlanData: VisPlanData|null,
+ *   contentReadiness: ContentReadiness|null,
  *   walkupType: DanceType,
  *   walkupPayment: PaymentTiming,
  *   walkupCounterValue: number,
  *   walkupCounterInterval: number|null,
- *   promo: {code: string, discount: number, promoId: string}|null
+ *   promo: PromoData|null,
+ *   pendingPromo: string|null,
+ *   partnerIg: string,
+ *   partnerName: string,
+ *   isSubmitting: boolean,
  * }} */
 const state = {
   currentScreen: 'routing',
@@ -227,16 +279,25 @@ const state = {
   selectedPackage: { type: 'social', price: 100 },
   collabAddon: false,
 
+  collectedEmail: '',
+  urlSource: '',
+
   // Slot booking
   sessions: [],       // real sessions from Airtable
   sessionsByDay: {},  // grouped by day string
   selectedDay: null,
   selectedSlot: null,
   slotSkipped: false,
+  secondDance: null,
+  festivalHasShow: false,
+  reservationRef: null,
+  isEarlyBird: false,
 
   // Visibility flow
   visibilityOutcome: null,
   visibilityPlan: null,
+  visPlanData: null,
+  contentReadiness: null,
 
   // Walk-up flow
   walkupType: 'social',
@@ -245,6 +306,15 @@ const state = {
   // Walk-up counter
   walkupCounterValue: 0,
   walkupCounterInterval: null,
+
+  // Promo
+  promo: null,
+  pendingPromo: null,
+
+  // Partner share
+  partnerIg: '',
+  partnerName: '',
+  isSubmitting: false,
 };
 
 // ==========================================
@@ -3542,7 +3612,7 @@ async function applyPromo(flow) {
   if (!code) { errorEl.textContent = 'Enter a code'; return; }
 
   const isEarlyBird = state.isEarlyBird || (state.activeCapture && ['Captured', 'Processing', 'Waitlisted'].includes(state.activeCapture?.status));
-  const baseAmount = (flow === 'archive' || flow === 'unlock') ? (isEarlyBird ? 8000 : 10000) : (state.selectedPackage.price + (state.collabAddon ? 100 : 0)) * 100;
+  const baseAmount = (flow === 'archive' || flow === 'unlock') ? (isEarlyBird ? 8000 : 10000) : getPreorderTotal().total * 100;
 
   try {
     const res = await fetch(`${API}/api/validate-promo?code=${encodeURIComponent(code)}&amount=${baseAmount}`);
@@ -3568,7 +3638,7 @@ async function autoApplyPromo(flow) {
   if (!state.pendingPromo) return;
   const code = state.pendingPromo;
   const isEB = state.isEarlyBird || (state.activeCapture && ['Captured', 'Processing', 'Waitlisted'].includes(state.activeCapture?.status));
-  const baseAmount = (flow === 'archive' || flow === 'unlock') ? (isEB ? 8000 : 10000) : (state.selectedPackage.price + (state.collabAddon ? 100 : 0)) * 100;
+  const baseAmount = (flow === 'archive' || flow === 'unlock') ? (isEB ? 8000 : 10000) : getPreorderTotal().total * 100;
 
   try {
     const res = await fetch(`${API}/api/validate-promo?code=${encodeURIComponent(code)}&amount=${baseAmount}`);
@@ -3689,7 +3759,7 @@ function updateCheckoutTotal(flow) {
       discountRow.innerHTML = '';
     }
   } else if (flow === 'preorder') {
-    const base = (state.selectedPackage.price + (state.collabAddon ? 100 : 0)) * 100;
+    const base = getPreorderTotal().total * 100;
     const discount = state.promo ? state.promo.discount : 0;
     const total = base - discount;
     document.getElementById('summaryTotal').textContent = '€' + (total / 100);
