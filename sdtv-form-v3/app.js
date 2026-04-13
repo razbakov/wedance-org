@@ -2065,11 +2065,27 @@ function selectSecondSession(sessionId) {
   if (dayEl) dayEl.textContent = state.secondDance.day;
   if (timeEl) timeEl.textContent = session.label + ' · ' + session.timeStart + '–' + session.timeEnd;
 
-  // Show bundle summary
+  // Show bundle summary with correct total
   const bundleEl = document.getElementById('bundleSummary');
   if (bundleEl) bundleEl.style.display = '';
+  updateBundleSummary();
 
   updateSlotCta();
+}
+
+function getPreorderTotal() {
+  const base = state.selectedPackage?.price || 100;
+  const second = state.secondDance?.slot ? 80 : 0;
+  const collab = state.collabAddon ? 100 : 0;
+  return { base, second, collab, savings: second ? 20 : 0, total: base + second + collab };
+}
+
+function updateBundleSummary() {
+  const t = getPreorderTotal();
+  const bundleTotal = document.getElementById('bundleTotal');
+  if (bundleTotal) bundleTotal.textContent = '€' + t.total;
+  const collabLine = document.getElementById('bundleCollabLine');
+  if (collabLine) collabLine.style.display = t.collab ? '' : 'none';
 }
 
 function updateSlotCta() {
@@ -2085,9 +2101,10 @@ function updateSlotCta() {
     if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = '2 dances · select day & slot for Dance 2'; }
   } else if (state.secondDance?.slot && state.secondDance?.day && state.selectedSlot) {
     // Both selected
+    const t = getPreorderTotal();
     if (ctaText) ctaText.textContent = 'Continue with 2 Dances';
     if (slotNextBtn) { slotNextBtn.disabled = false; slotNextBtn.classList.remove('disabled'); }
-    if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = '2 dances · €180 (save €20)'; }
+    if (ctaHint) { ctaHint.style.display = ''; ctaHint.textContent = `2 dances · €${t.total} (save €20)`; }
   } else if (state.selectedSlot) {
     // Only first dance
     if (ctaText) ctaText.textContent = 'Continue with This Slot';
@@ -2144,10 +2161,9 @@ function goToPreorderCheckout() {
     }
   }
 
-  const secondDanceAmount = hasSecond ? 80 : 0;
-  const total = state.selectedPackage.price + secondDanceAmount + (state.collabAddon ? 100 : 0);
-  document.getElementById('summaryTotal').textContent = '€' + total;
-  document.getElementById('checkoutTotal').textContent = '€' + total;
+  const t = getPreorderTotal();
+  document.getElementById('summaryTotal').textContent = '€' + t.total;
+  document.getElementById('checkoutTotal').textContent = '€' + t.total;
   const applePayTotal = document.getElementById('applePayTotal');
   if (applePayTotal) applePayTotal.textContent = '€' + total;
 
@@ -3341,8 +3357,8 @@ async function processPreorderPayment() {
   if (name.length < 2) { shakeElement(document.getElementById('preorderName')); return; }
   if (!isValidEmail(email)) { const el = document.getElementById('preorderEmail'); el.focus(); el.classList.add('error'); shakeElement(el); return; }
 
-  const secondDanceAmount = state.secondDance?.slot ? 80 : 0;
-  const total = state.selectedPackage.price + secondDanceAmount + (state.collabAddon ? 100 : 0);
+  const t = getPreorderTotal();
+  const total = t.total;
   const btn = document.getElementById('preorderCheckoutBtn');
   const originalText = btn.innerHTML;
   btn.innerHTML = '<span class="searching-spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;"></span> Processing...';
