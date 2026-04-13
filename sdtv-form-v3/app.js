@@ -1707,23 +1707,48 @@ function selectPackage(el, type, price) {
 }
 
 function updateTotal() {
-  const collabToggle = document.getElementById('collabToggle');
-  const collab = collabToggle ? collabToggle.checked : false;
-  state.collabAddon = collab;
+  // Package screen total (no collab here anymore — collab moved to checkout)
+  const totalEl = document.getElementById('totalPrice');
+  if (totalEl) totalEl.textContent = '€' + (state.selectedPackage?.price || 100);
+}
 
-  // Show/hide collab details
-  const collabDetails = document.getElementById('collabDetails');
-  if (collabDetails) {
-    if (collab) {
-      collabDetails.classList.add('open');
-    } else {
-      collabDetails.classList.remove('open');
-    }
+function addCollabFromCheckout() {
+  state.collabAddon = true;
+  haptic('medium');
+  const offer = document.getElementById('checkoutCollabOffer');
+  const added = document.getElementById('checkoutCollabAdded');
+  if (offer) offer.style.display = 'none';
+  if (added) added.style.display = '';
+  refreshCheckoutTotal();
+}
+
+function removeCollabFromCheckout() {
+  state.collabAddon = false;
+  const offer = document.getElementById('checkoutCollabOffer');
+  const added = document.getElementById('checkoutCollabAdded');
+  if (offer) offer.style.display = '';
+  if (added) added.style.display = 'none';
+  refreshCheckoutTotal();
+}
+
+function refreshCheckoutTotal() {
+  const t = getPreorderTotal();
+  const summaryTotal = document.getElementById('summaryTotal');
+  const checkoutTotal = document.getElementById('checkoutTotal');
+  const summaryCollab = document.getElementById('summaryCollab');
+  if (summaryTotal) summaryTotal.textContent = '€' + t.total;
+  if (checkoutTotal) checkoutTotal.textContent = '€' + t.total;
+  if (summaryCollab) summaryCollab.style.display = t.collab ? '' : 'none';
+
+  // Update IG required label
+  const igLabel = document.getElementById('igRequiredLabel');
+  if (igLabel) {
+    igLabel.innerHTML = t.collab ? '<span style="color:var(--sdtv-red);">*</span> required for Collab' : '(optional)';
   }
 
-  const total = state.selectedPackage.price + (collab ? 100 : 0);
-  const totalEl = document.getElementById('totalPrice');
-  if (totalEl) totalEl.textContent = '€' + total;
+  // Show/hide collab confirm checkbox
+  const collabConfirm = document.getElementById('collabConfirm');
+  if (collabConfirm) collabConfirm.style.display = t.collab ? '' : 'none';
 }
 
 // ==========================================
@@ -2144,45 +2169,34 @@ function goToPreorderCheckout() {
     savingsLine.style.display = hasSecond ? 'flex' : 'none';
   }
 
-  const collabLine = document.getElementById('summaryCollab');
-  collabLine.style.display = state.collabAddon ? 'flex' : 'none';
-
   // Update slot text
   const summarySlotText = document.getElementById('summarySlotText');
   if (summarySlotText) {
     if (state.selectedSlot && state.selectedDay) {
-      let slotText = 'Dance 1: ' + state.selectedDay + ', ' + state.selectedSlot.label;
+      let slotText = hasSecond ? 'Dance 1: ' : 'Filming: ';
+      slotText += state.selectedDay + ', ' + state.selectedSlot.label;
       if (hasSecond) {
         slotText += '\nDance 2: ' + state.secondDance.day + ', ' + state.secondDance.slot.label;
       }
       summarySlotText.textContent = slotText;
+      if (hasSecond) summarySlotText.style.whiteSpace = 'pre-line';
     } else {
       summarySlotText.textContent = 'Filming: TBD (we\'ll send a link)';
     }
   }
 
-  const t = getPreorderTotal();
-  document.getElementById('summaryTotal').textContent = '€' + t.total;
-  document.getElementById('checkoutTotal').textContent = '€' + t.total;
-  const applePayTotal = document.getElementById('applePayTotal');
-  if (applePayTotal) applePayTotal.textContent = '€' + total;
-
-  // Show/hide collab confirm checkbox
-  const collabConfirm = document.getElementById('collabConfirm');
-  if (collabConfirm) {
-    collabConfirm.style.display = state.collabAddon ? '' : 'none';
+  // Reset collab UI to offer state (user can add on checkout)
+  const collabOffer = document.getElementById('checkoutCollabOffer');
+  const collabAdded = document.getElementById('checkoutCollabAdded');
+  if (state.collabAddon) {
+    if (collabOffer) collabOffer.style.display = 'none';
+    if (collabAdded) collabAdded.style.display = '';
+  } else {
+    if (collabOffer) collabOffer.style.display = '';
+    if (collabAdded) collabAdded.style.display = 'none';
   }
 
-  // Update IG required label
-  const igLabel = document.getElementById('igRequiredLabel');
-  if (igLabel) {
-    if (state.collabAddon) {
-      igLabel.innerHTML = '<span style="color:var(--sdtv-red);">*</span> required for Collab';
-    } else {
-      igLabel.textContent = '(optional)';
-    }
-  }
-
+  refreshCheckoutTotal();
   showScreen('preorder-checkout');
 }
 

@@ -2427,6 +2427,27 @@ body {
 .bundle-save { font-weight: 600; }
 .bundle-total { font-weight: 700; color: var(--sdtv-ivory); border-top: 1px solid var(--sdtv-border); padding-top: 6px; margin-top: 2px; }
 
+/* Checkout collab upsell */
+.checkout-collab-upsell { margin-bottom: var(--space-4); }
+.checkout-collab-offer {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--sdtv-surface);
+  border: 1.5px solid var(--sdtv-border);
+  border-radius: var(--radius-lg);
+  animation: fadeSlideUp 300ms var(--ease-out);
+}
+.checkout-collab-added {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(76,175,80,0.08);
+  border: 1px solid rgba(76,175,80,0.2);
+  border-radius: var(--radius-lg);
+}
+.checkout-collab-left { flex: 1; min-width: 0; }
+.checkout-collab-title { font-size: var(--text-sm); font-weight: 600; color: var(--sdtv-ivory); margin-bottom: 2px; }
+.checkout-collab-desc { font-size: var(--text-xs); color: var(--sdtv-text-muted); line-height: 1.4; }
+
 /* Bottom block: skip + CTA grouped tightly */
 .slot-bottom-block {
   display: flex;

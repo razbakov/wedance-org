@@ -684,30 +684,6 @@ if ('serviceWorker' in navigator) {
           </div>
         </div>
         
-        <!-- REDESIGNED: Feature on SDTV Channel (was "Add Promo Reel") -->
-        <div class="collab-card" id="collabCard">
-          <div class="collab-header">
-            <div class="collab-info">
-              <h4 class="collab-title">✨ Feature on SDTV Channel</h4>
-              <p class="collab-subtitle">Published to <strong>509K+ followers</strong></p>
-            </div>
-            <div class="collab-toggle-wrap">
-              <span class="collab-price">+€100</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="collabToggle" onchange="updateTotal()">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-          <div class="collab-details" id="collabDetails">
-            <div class="collab-features">
-              <span>✓ Instagram Collab post — appears on your profile too</span>
-              <span>✓ You get tagged & credited</span>
-              <span>✓ Avg. 50K+ views per post</span>
-            </div>
-          </div>
-        </div>
-        
         <div class="total-bar">
           <span class="total-label">Total</span>
           <span class="total-price" id="totalPrice">€100</span>
@@ -868,6 +844,24 @@ if ('serviceWorker' in navigator) {
           </div>
         </div>
         
+        <!-- Collab upsell on checkout (moved from packages screen) -->
+        <div class="checkout-collab-upsell" id="checkoutCollabUpsell">
+          <div class="checkout-collab-offer" id="checkoutCollabOffer">
+            <div class="checkout-collab-left">
+              <div class="checkout-collab-title">✨ Feature on SDTV Channel</div>
+              <div class="checkout-collab-desc">Best moment from your dances → 509K+ followers · Collab post on your profile</div>
+            </div>
+            <button class="btn-sm btn-outline" onclick="addCollabFromCheckout()">+ €100</button>
+          </div>
+          <div class="checkout-collab-added" id="checkoutCollabAdded" style="display:none;">
+            <div class="checkout-collab-left">
+              <span style="color:var(--sdtv-green);">✓</span>
+              <span>SDTV Channel Feature added</span>
+            </div>
+            <button class="btn-ghost btn-xs" onclick="removeCollabFromCheckout()" style="color:var(--sdtv-text-faint);font-size:11px;">Remove</button>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Your name</label>
           <input type="text" id="preorderName" class="form-input" placeholder="Full name" oninput="validatePreorderCheckout()">
