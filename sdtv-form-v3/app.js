@@ -573,6 +573,8 @@ function resetForm() {
   state.visPlanData = null;
   state.contentReadiness = null;
   state.isEarlyBird = false;
+  state.promo = null;
+  state.pendingPromo = null;
   state.reservationRef = null;
   state.secondDance = null;
   state.festivalHasShow = false;
@@ -3066,7 +3068,7 @@ function renderMondayDancers(filter = '') {
     : mondayDancers;
   
   container.innerHTML = filtered.map(d => `
-    <div class="monday-dancer-item" onclick="selectMondayDancer('${d.handle}', '${d.name}')">
+    <div class="monday-dancer-item" onclick="selectMondayDancer('${d.handle}', '${d.name}', this)">
       <div class="monday-dancer-avatar">${d.emoji}</div>
       <div class="monday-dancer-info">
         <div class="monday-dancer-name">${d.name}</div>
@@ -3097,12 +3099,12 @@ function filterMondayDancers() {
   }
 }
 
-function selectMondayDancer(handle, name) {
+function selectMondayDancer(handle, name, el) {
   mondaySelectedDancer = { handle, name };
-  
+
   // Highlight selected
-  document.querySelectorAll('.monday-dancer-item').forEach(el => el.classList.remove('highlighted'));
-  event.currentTarget.classList.add('highlighted');
+  document.querySelectorAll('.monday-dancer-item').forEach(item => item.classList.remove('highlighted'));
+  if (el) el.classList.add('highlighted');
   
   // Show match result
   showMondayMatchResult(true);
@@ -3575,13 +3577,13 @@ async function processPreorderPayment() {
       try {
         await fetch(`${API}/api/send-booking-email`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, festival: festName, pkg: pkgName, day: state.selectedDay || '', slot: slotLabel, amount: (total / 100).toFixed(0) })
+          body: JSON.stringify({ email, name, festival: festName, pkg: pkgName, day: state.selectedDay || '', slot: slotLabel, amount: total.toFixed(0) })
         });
       } catch (e) { console.error('Booking email error:', e); }
       try {
         await fetch(`${API}/api/send-receipt-email`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, amount: total, description: `Preorder — ${pkgName} — ${festName}`, paymentId: paymentIntent.id })
+          body: JSON.stringify({ email, amount: total * 100, description: `Preorder — ${pkgName} — ${festName}`, paymentId: paymentIntent.id })
         });
       } catch (e) { console.error('Receipt email error:', e); }
 
@@ -3741,9 +3743,10 @@ function updateCheckoutTotal(flow) {
       discountRow.remove();
     }
   } else if (flow === 'unlock') {
+    const clipCount = (state.activeCaptures || []).length || 1;
     const isEarlyBird = state.isEarlyBird ||
       (state.activeCapture && ['Captured', 'Processing', 'Waitlisted'].includes(state.activeCapture?.status));
-    const base = isEarlyBird ? 8000 : 10000;
+    const base = clipCount * (isEarlyBird ? 8000 : 10000);
     const discount = state.promo ? state.promo.discount : 0;
     const total = Math.max(0, base - discount);
 
@@ -4012,11 +4015,20 @@ function setupUnlockScreen() {
   }
 }
 
+function getUnlockAmount() {
+  const clipCount = (state.activeCaptures || []).length || 1;
+  const isEB = state.isEarlyBird || (state.activeCapture && ['Captured', 'Processing', 'Waitlisted'].includes(state.activeCapture?.status));
+  const perClip = isEB ? 8000 : 10000;
+  const base = clipCount * perClip;
+  const discount = state.promo ? state.promo.discount : 0;
+  return Math.max(0, base - discount);
+}
+
 function mountPaymentRequest() {
   const s = getStripe();
   if (!s) return;
 
-  const amount = state.promo ? state.promo.newTotal : 10000;
+  const amount = getUnlockAmount();
   const paymentRequest = s.paymentRequest({
     country: 'ES',
     currency: 'eur',
@@ -4061,7 +4073,15 @@ function mountPaymentRequest() {
         return;
       }
       ev.complete('success');
-      if (paymentIntent.status === 'succeeded' || paymentIntent.status === 'requires_action') {
+      // Handle 3DS: requires_action means payment NOT yet confirmed — must verify first
+      if (paymentIntent.status === 'requires_action') {
+        const { error: actionError, paymentIntent: confirmedPI } = await s.confirmCardPayment(piData.clientSecret);
+        if (actionError || confirmedPI?.status !== 'succeeded') {
+          showToast('Payment verification failed. Please try with a card instead.');
+          return;
+        }
+      }
+      if (paymentIntent.status === 'succeeded') {
         // Save to Airtable
         try {
           await fetch(`${API}/api/people/upsert`, {
@@ -4105,7 +4125,7 @@ async function processUnlockPayment() {
   btn.innerHTML = '<span class="searching-spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;"></span> Processing...';
   btn.disabled = true;
 
-  const amount = state.promo ? state.promo.newTotal : 10000;
+  const amount = getUnlockAmount();
 
   // FREE ORDER: skip Stripe, go straight to confirmation
   if (amount <= 0) {

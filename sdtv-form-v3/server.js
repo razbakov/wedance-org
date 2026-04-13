@@ -18,6 +18,31 @@ const app = express();
 /** @type {number} */
 const PORT = parseInt(process.env.PORT || '8001', 10);
 
+// ── RATE LIMITING (in-memory, per IP) ───────────────
+const rateLimits = {};
+function rateLimit(windowMs, maxRequests) {
+  return (req, res, next) => {
+    const key = req.ip + ':' + req.baseUrl + req.path;
+    const now = Date.now();
+    if (!rateLimits[key] || now - rateLimits[key].start > windowMs) {
+      rateLimits[key] = { start: now, count: 1 };
+    } else {
+      rateLimits[key].count++;
+    }
+    if (rateLimits[key].count > maxRequests) {
+      return res.status(429).json({ error: 'Too many requests, try again later' });
+    }
+    next();
+  };
+}
+// Clean up old entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const key of Object.keys(rateLimits)) {
+    if (now - rateLimits[key].start > 900000) delete rateLimits[key];
+  }
+}, 600000);
+
 // ffmpeg for preview generation — prefer ffmpeg-static, fall back to system ffmpeg
 /** @type {string} */
 const FFMPEG = (() => { try { return require('ffmpeg-static'); } catch { return 'ffmpeg'; } })();
@@ -650,11 +675,24 @@ app.use((req, res, next) => {
 // ── GZIP / BROTLI ───────────────────────────────────
 app.use(require('compression')());
 
-app.use(express.json());
+app.use(express.json({ limit: '16kb' }));
+
+// Serve only public files — NEVER expose server.js, package.json, etc.
+const ALLOWED_FILES = new Set(['index.html', 'app.js', 'style.css', 'sw.js', 'logo.png']);
+app.use((req, res, next) => {
+  const file = req.path.replace(/^\//, '');
+  if (req.path === '/' || ALLOWED_FILES.has(file)) {
+    return next();
+  }
+  if (req.path.startsWith('/api/') || req.path.startsWith('/delivery')) {
+    return next();
+  }
+  return res.status(404).end();
+});
 app.use(express.static(__dirname, {
   maxAge: '1h',
-  setHeaders: (res, path) => {
-    if (path.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
   }
 }));
 app.use((req, res, next) => {
@@ -1012,7 +1050,7 @@ app.post('/api/notifications', async (req, res) => {
 
 // ── POST /api/send-delivery-email ──────────────────
 // Send branded delivery email after payment
-app.post('/api/send-delivery-email', async (req, res) => {
+app.post('/api/send-delivery-email', rateLimit(3600000, 10), async (req, res) => {
   try {
     const { email, captureId, ig, festival } = req.body || {};
     if (!email || !captureId) {
@@ -1062,7 +1100,7 @@ app.post('/api/send-delivery-email', async (req, res) => {
 });
 
 // ── POST /api/send-booking-email ─────────────────────
-app.post('/api/send-booking-email', async (req, res) => {
+app.post('/api/send-booking-email', rateLimit(3600000, 10), async (req, res) => {
   try {
     const { email, name, festival, pkg, day, slot, amount } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email required' });
@@ -1075,7 +1113,7 @@ app.post('/api/send-booking-email', async (req, res) => {
 });
 
 // ── POST /api/send-receipt-email ─────────────────────
-app.post('/api/send-receipt-email', async (req, res) => {
+app.post('/api/send-receipt-email', rateLimit(3600000, 10), async (req, res) => {
   try {
     const { email, amount, currency, description, paymentId } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email required' });
@@ -1092,7 +1130,7 @@ app.post('/api/send-receipt-email', async (req, res) => {
 });
 
 // ── POST /api/send-visibility-welcome ────────────────
-app.post('/api/send-visibility-welcome', async (req, res) => {
+app.post('/api/send-visibility-welcome', rateLimit(3600000, 10), async (req, res) => {
   try {
     const { email, name, plan, instagram } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email required' });
@@ -1105,7 +1143,7 @@ app.post('/api/send-visibility-welcome', async (req, res) => {
 });
 
 // ── POST /api/send-video-ready-alert ─────────────────
-app.post('/api/send-video-ready-alert', async (req, res) => {
+app.post('/api/send-video-ready-alert', rateLimit(3600000, 10), async (req, res) => {
   try {
     const { email, dancerName, festival, captureId, ig } = req.body || {};
     if (!email || !captureId) return res.status(400).json({ error: 'Email and captureId required' });
@@ -1129,7 +1167,7 @@ app.post('/api/send-video-ready-alert', async (req, res) => {
 // ── POST /api/send-archive-offer ────────────────────
 // Send archive video offer — separate campaign from current festival sales.
 // Price is passed per-request (not hardcoded) so it can be adjusted.
-app.post('/api/send-archive-offer', async (req, res) => {
+app.post('/api/send-archive-offer', rateLimit(3600000, 10), async (req, res) => {
   try {
     const { email, dancerName, festival, year, price, currency, captureId, ig } = req.body || {};
     if (!email) return res.status(400).json({ error: 'Email required' });
@@ -1348,7 +1386,7 @@ app.get('/api/validate-promo', async (req, res) => {
 // ── POST /api/create-payment-intent ──────────────────
 // Create a Stripe PaymentIntent for checkout
 // Server determines price from capture status — client cannot set amount
-app.post('/api/create-payment-intent', async (req, res) => {
+app.post('/api/create-payment-intent', rateLimit(900000, 20), async (req, res) => {
   if (!stripe) return res.status(503).json({ error: 'Payments not configured' });
   try {
     const { captureId, currency, description, metadata, promoId } = req.body || {};
@@ -1371,12 +1409,17 @@ app.post('/api/create-payment-intent', async (req, res) => {
         console.warn('Could not verify capture status, using base price:', e.message);
       }
     } else if (flow === 'preorder' || flow === 'visibility' || flow === 'upsell-feature') {
-      // Non-archive flows: accept client BASE amount (before promo)
-      // Promo re-validation below will apply discount server-side
-      const clientAmount = parseInt(req.body.amount, 10);
-      if (clientAmount && clientAmount >= 100 && clientAmount <= 100000) {
-        // If client already applied promo, use the pre-discount base instead
-        amount = promoId ? (parseInt(req.body.baseAmount, 10) || clientAmount) : clientAmount;
+      // Server-side price enforcement — don't trust client amount
+      const FLOW_PRICES = {
+        'preorder': 10000,      // €100 base — collab add-on calculated below
+        'visibility': 34900,    // €349
+        'upsell-feature': 10000 // €100
+      };
+      amount = FLOW_PRICES[flow] || SDTV_PRICING.base;
+      // Preorder: check for collab and second dance from metadata
+      if (flow === 'preorder' && metadata) {
+        if (metadata.collab === 'yes') amount += 10000; // +€100 collab
+        if (metadata.secondDance === 'yes') amount += 8000; // +€80 second dance
       }
     }
 
