@@ -3402,9 +3402,12 @@ async function processArchivePayment() {
     });
     const piData = await piRes.json();
     if (!piRes.ok) throw new Error(piData.error || 'Payment setup failed');
+    assertPayment(piData.clientSecret, 'Missing clientSecret from server');
+    assertPayment(piData.amount > 0, `Server returned invalid amount: ${piData.amount}`);
 
     // 2. Confirm payment with Stripe
     const s = getStripe();
+    assertPayment(stripeElements.archive, 'Stripe card element not mounted');
     const { error, paymentIntent } = await s.confirmCardPayment(piData.clientSecret, {
       payment_method: {
         card: stripeElements.archive,
@@ -3502,6 +3505,7 @@ async function processPreorderPayment() {
           festival: state.selectedUpcomingFestival?.name || '',
           package: state.selectedPackage?.type || '',
           dances: String(danceCount),
+          secondDance: danceCount > 1 ? 'yes' : 'no',
           collab: state.collabAddon ? 'yes' : 'no',
           day: state.selectedDay || '',
           slot: state.selectedSlot?.label || '',
@@ -3513,8 +3517,11 @@ async function processPreorderPayment() {
     });
     const piData = await piRes.json();
     if (!piRes.ok) throw new Error(piData.error || 'Payment setup failed');
+    assertPayment(piData.clientSecret, 'Missing clientSecret from server');
+    assertPayment(piData.amount > 0, `Server returned invalid amount: ${piData.amount}`);
 
     const s = getStripe();
+    assertPayment(stripeElements.preorder, 'Stripe card element not mounted');
     const { error, paymentIntent } = await s.confirmCardPayment(piData.clientSecret, {
       payment_method: {
         card: stripeElements.preorder,
@@ -3785,8 +3792,8 @@ function updateCheckoutTotal(flow) {
     }
   } else if (flow === 'preorder') {
     const base = getPreorderTotal().total * 100;
-    const discount = state.promo ? state.promo.discount : 0;
-    const total = base - discount;
+    const discount = state.promo ? Math.min(state.promo.discount, base) : 0;
+    const total = Math.max(0, base - discount);
     document.getElementById('summaryTotal').textContent = '€' + (total / 100);
     document.getElementById('checkoutTotal').textContent = '€' + (total / 100);
   }
@@ -3847,8 +3854,10 @@ async function processUpsellPayment() {
     });
     const piData = await piRes.json();
     if (!piRes.ok) throw new Error(piData.error || 'Payment setup failed');
+    assertPayment(piData.clientSecret, 'Missing clientSecret from server');
 
     const s = getStripe();
+    assertPayment(stripeElements.upsell, 'Stripe card element not mounted');
     const { error, paymentIntent } = await s.confirmCardPayment(piData.clientSecret, {
       payment_method: {
         card: stripeElements.upsell,
@@ -4015,13 +4024,28 @@ function setupUnlockScreen() {
   }
 }
 
+// ── PAYMENT VALIDATION GUARDS ─────────────────────────
+// Runtime checks to catch pricing bugs before they hit Stripe.
+// See payment-types.ts for full type definitions and rules.
+function assertPayment(condition, msg) {
+  if (!condition) {
+    console.error('[PAYMENT GUARD]', msg);
+    showToast('Payment error — please try again or contact us.');
+    throw new Error(msg);
+  }
+}
+
 function getUnlockAmount() {
   const clipCount = (state.activeCaptures || []).length || 1;
+  assertPayment(clipCount >= 1 && clipCount <= 20, `Invalid clip count: ${clipCount}`);
   const isEB = state.isEarlyBird || (state.activeCapture && ['Captured', 'Processing', 'Waitlisted'].includes(state.activeCapture?.status));
   const perClip = isEB ? 8000 : 10000;
   const base = clipCount * perClip;
-  const discount = state.promo ? state.promo.discount : 0;
-  return Math.max(0, base - discount);
+  const discount = state.promo ? Math.min(state.promo.discount, base) : 0;
+  const total = Math.max(0, base - discount);
+  // Sanity: total should never exceed 20 clips * €100
+  assertPayment(total <= 200000, `Unlock amount suspiciously high: ${total}`);
+  return total;
 }
 
 function mountPaymentRequest() {
@@ -4129,11 +4153,12 @@ async function processUnlockPayment() {
 
   // FREE ORDER: skip Stripe, go straight to confirmation
   if (amount <= 0) {
+    assertPayment(state.promo, 'Free order without promo — pricing bug');
     try {
       await fetch(`${API}/api/people/upsert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ig: state.dancerIdentity || '', email, source: 'Free Unlock (promo)' })
+        body: JSON.stringify({ ig: state.dancerIdentity || '', email, source: 'Free Unlock (promo)', paid: true })
       });
       await fetch(`${API}/api/notifications`, {
         method: 'POST',
@@ -4168,8 +4193,15 @@ async function processUnlockPayment() {
     });
     const piData = await piRes.json();
     if (!piRes.ok) throw new Error(piData.error || 'Payment setup failed');
+    assertPayment(piData.clientSecret, 'Missing clientSecret from server');
+    assertPayment(piData.amount > 0, `Server returned invalid amount: ${piData.amount}`);
+    // Verify server price matches what we expected (within promo tolerance)
+    if (Math.abs(piData.amount - amount) > 100 && !state.promo) {
+      console.warn(`[PAYMENT GUARD] Price mismatch: client=${amount} server=${piData.amount}`);
+    }
 
     const s = getStripe();
+    assertPayment(stripeElements.unlock, 'Stripe card element not mounted');
     const { error, paymentIntent } = await s.confirmCardPayment(piData.clientSecret, {
       payment_method: {
         card: stripeElements.unlock,

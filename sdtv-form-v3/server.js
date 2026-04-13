@@ -1444,6 +1444,13 @@ app.post('/api/create-payment-intent', rateLimit(900000, 20), async (req, res) =
     if (amount < 100) {
       return res.status(400).json({ error: 'Amount must be at least €1 (100 cents)' });
     }
+    if (amount > 100000) {
+      console.error('[PAYMENT GUARD] Suspiciously high amount:', amount, 'flow:', flow);
+      return res.status(400).json({ error: 'Amount exceeds maximum' });
+    }
+    if (!Number.isInteger(amount)) {
+      amount = Math.round(amount);
+    }
 
     const piParams = {
       amount,
