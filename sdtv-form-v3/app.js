@@ -1763,14 +1763,21 @@ async function goToPreorderSlot() {
   state.selectedDay = null;
   state.selectedSlot = null;
   state.slotSkipped = false;
+  state.secondDance = null;
   state.sessions = [];
   state.sessionsByDay = {};
 
-  // Hide time slots and summary
+  // Hide time slots, summaries, and second dance UI
   const timeSlotsEl = document.getElementById('timeSlots');
   if (timeSlotsEl) timeSlotsEl.classList.remove('visible');
   const slotSummary = document.getElementById('slotSummary');
   if (slotSummary) slotSummary.style.display = 'none';
+  const secondDanceSlot = document.getElementById('secondDanceSlot');
+  if (secondDanceSlot) secondDanceSlot.style.display = 'none';
+  const secondDanceUpsell = document.getElementById('secondDanceUpsell');
+  if (secondDanceUpsell) secondDanceUpsell.style.display = 'none';
+  const bundleSummary = document.getElementById('bundleSummary');
+  if (bundleSummary) bundleSummary.style.display = 'none';
 
   const slotNextBtn = document.getElementById('slotNextBtn');
   if (slotNextBtn) { slotNextBtn.disabled = true; slotNextBtn.classList.add('disabled'); }
