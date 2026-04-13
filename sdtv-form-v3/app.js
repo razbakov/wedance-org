@@ -1837,7 +1837,7 @@ async function goToPreorderSlot() {
   state.sessions = [];
   state.sessionsByDay = {};
 
-  // Hide time slots, summaries, and second dance UI
+  // Full UI reset — clear everything from previous flow
   const timeSlotsEl = document.getElementById('timeSlots');
   if (timeSlotsEl) timeSlotsEl.classList.remove('visible');
   const slotSummary = document.getElementById('slotSummary');
@@ -1848,9 +1848,30 @@ async function goToPreorderSlot() {
   if (secondDanceUpsell) secondDanceUpsell.style.display = 'none';
   const bundleSummary = document.getElementById('bundleSummary');
   if (bundleSummary) bundleSummary.style.display = 'none';
+  const slotSummarySecond = document.getElementById('slotSummarySecond');
+  if (slotSummarySecond) slotSummarySecond.style.display = 'none';
+  const timeSlotsSecond = document.getElementById('timeSlotsSecond');
+  if (timeSlotsSecond) timeSlotsSecond.classList.remove('visible');
 
+  // Clear day selector selections
+  const daySelector = document.getElementById('daySelector');
+  if (daySelector) daySelector.innerHTML = '';
+  const daySelectorSecond = document.getElementById('daySelectorSecond');
+  if (daySelectorSecond) daySelectorSecond.innerHTML = '';
+
+  // Clear slot lists
+  const slotsList = document.getElementById('slotsList');
+  if (slotsList) slotsList.innerHTML = '';
+  const slotsListSecond = document.getElementById('slotsListSecond');
+  if (slotsListSecond) slotsListSecond.innerHTML = '';
+
+  // Reset CTA
   const slotNextBtn = document.getElementById('slotNextBtn');
   if (slotNextBtn) { slotNextBtn.disabled = true; slotNextBtn.classList.add('disabled'); }
+  const ctaText = document.getElementById('slotCtaText');
+  if (ctaText) ctaText.textContent = 'Select a slot to continue';
+  const ctaHint = document.getElementById('slotCtaHint');
+  if (ctaHint) ctaHint.style.display = 'none';
 
   showScreen('preorder-slot');
 
