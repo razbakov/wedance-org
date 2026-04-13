@@ -812,58 +812,59 @@ if ('serviceWorker' in navigator) {
         <div class="step-indicator">STEP 4 OF 4</div>
         <h2 class="screen-title">Complete your booking</h2>
         
-        <!-- Order Summary -->
-        <div class="order-summary">
-          <div class="summary-row">
-            <span class="summary-label" id="summaryFestivalName">Festival</span>
+        <!-- Order Summary — premium layout -->
+        <div class="checkout-summary">
+          <div class="checkout-summary-header" id="summaryFestivalName">Festival</div>
+
+          <div class="checkout-items">
+            <div class="checkout-item">
+              <span class="checkout-item-name" id="summaryPackageName">Social Dance Video</span>
+              <span class="checkout-item-price" id="summaryPackagePrice">€100</span>
+            </div>
+            <div class="checkout-item" id="summarySecondDance" style="display:none;">
+              <span class="checkout-item-name">Dance 2</span>
+              <span class="checkout-item-price">€80</span>
+            </div>
+            <div class="checkout-item checkout-item--savings" id="summarySavings" style="display:none;">
+              <span>Bundle savings</span>
+              <span>-€20</span>
+            </div>
+            <div class="checkout-item" id="summaryCollab" style="display:none;">
+              <span class="checkout-item-name">SDTV Channel Feature</span>
+              <span class="checkout-item-price">€100</span>
+            </div>
           </div>
-          <div class="price-divider"></div>
-          <div class="summary-row">
-            <span id="summaryPackageName">Social Dance Video</span>
-            <span id="summaryPackagePrice">€100</span>
+
+          <div class="checkout-slots" id="summarySlot">
+            <span class="checkout-slot-text" id="summarySlotText">Filming: TBD</span>
           </div>
-          <div class="summary-row" id="summarySecondDance" style="display:none;">
-            <span>Dance 2</span>
-            <span>€80</span>
-          </div>
-          <div class="summary-row" id="summarySavings" style="display:none;color:var(--sdtv-green);">
-            <span>Bundle savings</span>
-            <span>-€20</span>
-          </div>
-          <div class="summary-row" id="summaryCollab" style="display:none;">
-            <span>Feature on SDTV Channel</span>
-            <span>€100</span>
-          </div>
-          <div class="summary-row" id="summarySlot">
-            <span class="summary-slot-text" id="summarySlotText">Filming: TBD</span>
-          </div>
-          <div class="price-divider"></div>
-          <div class="summary-row price-total">
+
+          <div class="checkout-total-row">
             <span>Total</span>
-            <span id="summaryTotal">€100</span>
+            <span class="checkout-total-amount" id="summaryTotal">€100</span>
           </div>
         </div>
-        
-        <!-- Collab upsell on checkout (moved from packages screen) -->
-        <div class="checkout-collab-upsell" id="checkoutCollabUpsell">
-          <div class="checkout-collab-offer" id="checkoutCollabOffer">
-            <div class="checkout-collab-left">
-              <div class="checkout-collab-title">✨ Feature on SDTV Channel</div>
-              <div class="checkout-collab-desc">Best moment from your dances → 509K+ followers · Collab post on your profile</div>
+
+        <!-- Collab upsell — quiet, optional -->
+        <div class="checkout-addon" id="checkoutCollabUpsell">
+          <div class="checkout-addon-offer" id="checkoutCollabOffer">
+            <div class="checkout-addon-info">
+              <span class="checkout-addon-label">✨ SDTV Channel Feature</span>
+              <span class="checkout-addon-bullets">509K+ reach · Collab on your profile</span>
             </div>
-            <button class="btn-sm btn-outline" onclick="addCollabFromCheckout()">+ €100</button>
+            <button class="checkout-addon-btn" onclick="addCollabFromCheckout()">+ €100</button>
           </div>
-          <div class="checkout-collab-added" id="checkoutCollabAdded" style="display:none;">
-            <div class="checkout-collab-left">
-              <span style="color:var(--sdtv-green);">✓</span>
-              <span>SDTV Channel Feature added</span>
-            </div>
+          <div class="checkout-addon-added" id="checkoutCollabAdded" style="display:none;">
+            <span style="color:var(--sdtv-green);font-size:12px;">✓ Channel Feature added</span>
             <button class="btn-ghost btn-xs" onclick="removeCollabFromCheckout()" style="color:var(--sdtv-text-faint);font-size:11px;">Remove</button>
           </div>
         </div>
 
+        <!-- Contact details -->
+        <div class="checkout-section-label">Your details</div>
+
         <div class="form-group">
-          <label class="form-label">Your name</label>
+          <label class="form-label">Name</label>
           <input type="text" id="preorderName" class="form-input" placeholder="Full name" oninput="validatePreorderCheckout()">
         </div>
         <div class="form-group">
@@ -874,17 +875,17 @@ if ('serviceWorker' in navigator) {
           <label class="form-label">Instagram <span class="form-optional" id="igRequiredLabel">(optional)</span></label>
           <input type="text" id="preorderInstagram" class="form-input" placeholder="@yourusername" oninput="validatePreorderCheckout()">
         </div>
-        
-        <!-- Collab confirmation -->
+
+        <!-- Collab IG confirmation -->
         <div class="collab-confirm" id="collabConfirm" style="display:none;">
           <label class="checkbox-wrap">
             <input type="checkbox" id="collabConfirmCheck">
             <span class="checkbox-mark"></span>
-            <span>I confirm my Instagram handle is correct for the SDTV Collab post</span>
+            <span>I confirm my Instagram handle is correct for the Collab post</span>
           </label>
         </div>
 
-        <!-- Promo discount banner -->
+        <!-- Promo code -->
         <div class="promo-applied" id="preorderPromoBanner" style="display:none;">
           <div class="promo-applied-left">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sdtv-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -901,19 +902,32 @@ if ('serviceWorker' in navigator) {
         </div>
         <div id="preorderPromoError" class="stripe-error"></div>
 
+        <!-- Payment -->
+        <div class="checkout-section-label">Payment</div>
         <div class="form-group">
-          <label class="form-label">Card details</label>
           <div id="preorderCardElement" class="stripe-card-element"></div>
           <div id="preorderCardErrors" class="stripe-error"></div>
         </div>
-        
-        <button class="btn-primary disabled" id="preorderCheckoutBtn" disabled onclick="processPreorderPayment()" style="width:100%;margin-top:12px;">
-          Reserve My Spot · <span id="checkoutTotal">€100</span>
-        </button>
-        <p class="checkout-terms">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Secured by Stripe · Free rescheduling · Money-back guarantee
-        </p>
+
+        <!-- What happens next -->
+        <div class="checkout-next-steps">
+          <div class="checkout-next-step">✓ Booking confirmed instantly</div>
+          <div class="checkout-next-step">✓ We film during your selected sessions</div>
+          <div class="checkout-next-step">✓ HD video delivered by email after the event</div>
+        </div>
+
+        <!-- Sticky CTA -->
+        <div class="checkout-sticky-cta">
+          <div class="checkout-sticky-inner">
+            <button class="btn-primary disabled" id="preorderCheckoutBtn" disabled onclick="processPreorderPayment()">
+              Confirm My Booking · <span id="checkoutTotal">€100</span>
+            </button>
+            <p class="checkout-terms">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Secured by Stripe · Free rescheduling
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 
