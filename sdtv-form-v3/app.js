@@ -2020,13 +2020,22 @@ function renderSecondDaySelector() {
     const month = parts[1] || '';
     const date = parts[2] || '';
     const isSelected = state.secondDance?.day === dayLabel;
+    const daySessions = state.sessionsByDay[dayLabel] || [];
+    const dayAvail = getDayAvailabilityFromSessions(daySessions);
+    const isSoldOut = !dayAvail.bookable;
+
+    const availText = isSelected ? 'Selected' : dayAvail.label;
+    const availClass = isSelected ? 'selected'
+      : dayAvail.label.toLowerCase().replace(/\s+/g, '-');
+
     return `
-      <button class="day-card ${isSelected ? 'selected' : ''}"
+      <button class="day-card ${isSelected ? 'selected' : ''} ${isSoldOut ? 'sold-out' : ''}"
               data-day="${dayLabel}"
-              onclick="selectSecondDay('${dayLabel}')">
+              onclick="${isSoldOut ? '' : `selectSecondDay('${dayLabel}')`}">
         <span class="day-card-weekday">${weekday}</span>
         <span class="day-card-date">${date}</span>
         <span class="day-card-month">${month}</span>
+        <span class="day-card-avail day-avail-${availClass}">${availText}</span>
       </button>
     `;
   }).join('');
@@ -2147,17 +2156,27 @@ function goToPreorderCheckout() {
     document.getElementById('summaryFestivalName').textContent = state.selectedUpcomingFestival.name;
   }
 
-  const packageName = state.selectedPackage.type === 'social' ? 'Social Dance Video' : 'Show Video';
   const hasSecond = state.secondDance?.slot;
-  document.getElementById('summaryPackageName').textContent = hasSecond ? 'Dance 1: ' + packageName : packageName;
-  document.getElementById('summaryPackagePrice').textContent = '€' + state.selectedPackage.price;
 
-  // Second dance line in summary
+  // Build slot-specific labels
+  const slot1Label = state.selectedSlot
+    ? `${state.selectedDay} · ${state.selectedSlot.label}`
+    : 'Filming slot TBD';
+  const slot2Label = hasSecond
+    ? `${state.secondDance.day} · ${state.secondDance.slot.label}`
+    : '';
+
+  const nameEl = document.getElementById('summaryPackageName');
+  const priceEl = document.getElementById('summaryPackagePrice');
+  if (nameEl) nameEl.textContent = hasSecond ? `Dance 1 · ${slot1Label}` : slot1Label;
+  if (priceEl) priceEl.textContent = '€' + state.selectedPackage.price;
+
+  // Second dance line
   const secondLine = document.getElementById('summarySecondDance');
   if (secondLine) {
     if (hasSecond) {
       secondLine.style.display = 'flex';
-      secondLine.innerHTML = `<span>Dance 2: ${packageName}</span><span>€80</span>`;
+      secondLine.innerHTML = `<span class="checkout-item-name">Dance 2 · ${slot2Label}</span><span class="checkout-item-price">€80</span>`;
     } else {
       secondLine.style.display = 'none';
     }
@@ -2169,21 +2188,9 @@ function goToPreorderCheckout() {
     savingsLine.style.display = hasSecond ? 'flex' : 'none';
   }
 
-  // Update slot text
-  const summarySlotText = document.getElementById('summarySlotText');
-  if (summarySlotText) {
-    if (state.selectedSlot && state.selectedDay) {
-      let slotText = hasSecond ? 'Dance 1: ' : 'Filming: ';
-      slotText += state.selectedDay + ', ' + state.selectedSlot.label;
-      if (hasSecond) {
-        slotText += '\nDance 2: ' + state.secondDance.day + ', ' + state.secondDance.slot.label;
-      }
-      summarySlotText.textContent = slotText;
-      if (hasSecond) summarySlotText.style.whiteSpace = 'pre-line';
-    } else {
-      summarySlotText.textContent = 'Filming: TBD (we\'ll send a link)';
-    }
-  }
+  // Slot text — now shown in line items, hide separate section
+  const summarySlot = document.getElementById('summarySlot');
+  if (summarySlot) summarySlot.style.display = 'none';
 
   // Reset collab UI to offer state (user can add on checkout)
   const collabOffer = document.getElementById('checkoutCollabOffer');

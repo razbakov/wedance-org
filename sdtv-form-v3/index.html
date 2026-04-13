@@ -849,19 +849,20 @@ if ('serviceWorker' in navigator) {
         <div class="checkout-addon" id="checkoutCollabUpsell">
           <div class="checkout-addon-offer" id="checkoutCollabOffer">
             <div class="checkout-addon-info">
-              <span class="checkout-addon-label">✨ SDTV Channel Feature</span>
-              <span class="checkout-addon-bullets">509K+ reach · Collab on your profile</span>
+              <span class="checkout-addon-label">✨ SDTV Feature Edit</span>
+              <span class="checkout-addon-bullets">We shape your strongest moment into a feature for 509K+ audience</span>
             </div>
-            <button class="checkout-addon-btn" onclick="addCollabFromCheckout()">+ €100</button>
+            <button class="checkout-addon-btn" onclick="addCollabFromCheckout()">Add · €100</button>
           </div>
           <div class="checkout-addon-added" id="checkoutCollabAdded" style="display:none;">
-            <span style="color:var(--sdtv-green);font-size:12px;">✓ Channel Feature added</span>
+            <span style="color:var(--sdtv-green);font-size:12px;">✓ SDTV Feature Edit added</span>
             <button class="btn-ghost btn-xs" onclick="removeCollabFromCheckout()" style="color:var(--sdtv-text-faint);font-size:11px;">Remove</button>
           </div>
         </div>
 
         <!-- Contact details -->
         <div class="checkout-section-label">Your details</div>
+        <p class="checkout-section-hint">We'll use this to confirm your booking and send your video later.</p>
 
         <div class="form-group">
           <label class="form-label">Name</label>
@@ -910,6 +911,7 @@ if ('serviceWorker' in navigator) {
         </div>
 
         <!-- What happens next -->
+        <div class="checkout-section-label">What happens next</div>
         <div class="checkout-next-steps">
           <div class="checkout-next-step">✓ Booking confirmed instantly</div>
           <div class="checkout-next-step">✓ We film during your selected sessions</div>
