@@ -3234,7 +3234,27 @@ function checkURLParams() {
 
   if (flow === 'visibility') {
     selectIntent('visibility');
+    // Deep link outcome: skip intro, go to packages
+    const outcome = params.get('outcome');
+    if (outcome === 'recognition' || outcome === 'event' || outcome === 'custom') {
+      setTimeout(() => selectVisibilityOutcome(outcome), 300);
+    }
     return 'visibility';
+  }
+
+  if (flow === 'status' || flow === 'check-status') {
+    state.currentFlow = 'status';
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'slide-back'));
+    document.getElementById('screen-check-status').classList.add('active');
+    state.currentScreen = 'check-status';
+    state.history = [];
+    updateProgressBar();
+    // Pre-fill email if provided
+    if (email) {
+      const statusEmail = document.getElementById('statusEmail');
+      if (statusEmail) statusEmail.value = email;
+    }
+    return 'status';
   }
 
   return false;
