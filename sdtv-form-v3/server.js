@@ -55,23 +55,12 @@ if (!AIRTABLE_TOKEN) {
   process.exit(1);
 }
 
-// ── EMAIL (Gmail SMTP via nodemailer) ───────────────
-const nodemailer = require('nodemailer');
-const GMAIL_USER = process.env.GMAIL_USER;     // e.g. socialdancetv@gmail.com
-const GMAIL_PASS = process.env.GMAIL_PASS;     // App Password from Google Account
-let emailTransport = null;
-if (GMAIL_USER && GMAIL_PASS) {
-  emailTransport = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: GMAIL_USER, pass: GMAIL_PASS },
-  });
-  console.log('Email initialized:', GMAIL_USER);
-} else {
-  console.warn('GMAIL_USER/GMAIL_PASS not set — email disabled');
-}
+// ── EMAIL (Resend via custom domain socialdancetv.com) ───────────────
+// Env: RESEND_API_KEY, EMAIL_FROM, EMAIL_REPLY_TO — see lib/email.js
+const { sendEmail, isEmailReady } = require('./lib/email');
 
 async function sendDeliveryEmail({ to, dancers, festival, style, session, deliveryUrl, previewThumb }) {
-  if (!emailTransport) { console.warn('Email not configured, skipping'); return; }
+  if (!isEmailReady()) { console.warn('Email not configured, skipping'); return; }
 
   const e = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const name = dancers || '';
@@ -220,12 +209,7 @@ async function sendDeliveryEmail({ to, dancers, festival, style, session, delive
 </body></html>`;
 
   try {
-    await emailTransport.sendMail({
-      from: `"Social Dance TV" <${GMAIL_USER}>`,
-      to,
-      subject,
-      html,
-    });
+    await sendEmail({ to, subject, html });
     console.log('Delivery email sent to', to);
   } catch (err) {
     console.error('Email send error:', err.message);
@@ -233,7 +217,7 @@ async function sendDeliveryEmail({ to, dancers, festival, style, session, delive
 }
 
 async function sendNotifyConfirmEmail({ to, dancerName, festival }) {
-  if (!emailTransport) return;
+  if (!isEmailReady()) return;
 
   const e = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const name = dancerName || 'there';
@@ -276,8 +260,7 @@ async function sendNotifyConfirmEmail({ to, dancerName, festival }) {
 </body></html>`;
 
   try {
-    await emailTransport.sendMail({
-      from: `"Social Dance TV" <${GMAIL_USER}>`,
+    await sendEmail({
       to,
       subject: festival ? `We're editing your dance — ${festival}` : `We're editing your dance video`,
       html,
@@ -290,7 +273,7 @@ async function sendNotifyConfirmEmail({ to, dancerName, festival }) {
 
 // ── Booking Confirmation Email ──────────────────────
 async function sendBookingConfirmEmail({ to, name, festival, pkg, day, slot, amount }) {
-  if (!emailTransport) return;
+  if (!isEmailReady()) return;
   const e = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   const serif = "Georgia,'Times New Roman',Times,serif";
@@ -358,14 +341,14 @@ async function sendBookingConfirmEmail({ to, name, festival, pkg, day, slot, amo
 </body></html>`;
 
   try {
-    await emailTransport.sendMail({ from: `"Social Dance TV" <${GMAIL_USER}>`, to, subject, html });
+    await sendEmail({ to, subject, html });
     console.log('Booking confirmation email sent to', to);
   } catch (err) { console.error('Booking email error:', err.message); }
 }
 
 // ── Payment Receipt Email ───────────────────────────
 async function sendPaymentReceiptEmail({ to, amount, currency, description, paymentId, date }) {
-  if (!emailTransport) return;
+  if (!isEmailReady()) return;
   const e = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   const serif = "Georgia,'Times New Roman',Times,serif";
@@ -423,14 +406,14 @@ async function sendPaymentReceiptEmail({ to, amount, currency, description, paym
 </body></html>`;
 
   try {
-    await emailTransport.sendMail({ from: `"Social Dance TV" <${GMAIL_USER}>`, to, subject, html });
+    await sendEmail({ to, subject, html });
     console.log('Receipt email sent to', to);
   } catch (err) { console.error('Receipt email error:', err.message); }
 }
 
 // ── Visibility Welcome Email ────────────────────────
 async function sendVisibilityWelcomeEmail({ to, name, plan, instagram }) {
-  if (!emailTransport) return;
+  if (!isEmailReady()) return;
   const e = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   const serif = "Georgia,'Times New Roman',Times,serif";
@@ -494,14 +477,14 @@ async function sendVisibilityWelcomeEmail({ to, name, plan, instagram }) {
 </body></html>`;
 
   try {
-    await emailTransport.sendMail({ from: `"Social Dance TV" <${GMAIL_USER}>`, to, subject, html });
+    await sendEmail({ to, subject, html });
     console.log('Visibility welcome email sent to', to);
   } catch (err) { console.error('Visibility welcome email error:', err.message); }
 }
 
 // ── Video Ready Alert Email ─────────────────────────
 async function sendVideoReadyEmail({ to, dancerName, festival, deliveryUrl }) {
-  if (!emailTransport) return;
+  if (!isEmailReady()) return;
   const e = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   const serif = "Georgia,'Times New Roman',Times,serif";
@@ -562,7 +545,7 @@ async function sendVideoReadyEmail({ to, dancerName, festival, deliveryUrl }) {
 </body></html>`;
 
   try {
-    await emailTransport.sendMail({ from: `"Social Dance TV" <${GMAIL_USER}>`, to, subject, html });
+    await sendEmail({ to, subject, html });
     console.log('Video ready email sent to', to);
   } catch (err) { console.error('Video ready email error:', err.message); }
 }
@@ -571,7 +554,7 @@ async function sendVideoReadyEmail({ to, dancerName, festival, deliveryUrl }) {
 // Warm/nostalgic tone — people receive this about a dance filmed years ago.
 // Price is configurable, not hardcoded.
 async function sendArchiveOfferEmail({ to, dancerName, festival, year, price, currency, deliveryUrl }) {
-  if (!emailTransport) return;
+  if (!isEmailReady()) return;
   const e = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   const serif = "Georgia,'Times New Roman',Times,serif";
@@ -636,7 +619,7 @@ async function sendArchiveOfferEmail({ to, dancerName, festival, year, price, cu
 </body></html>`;
 
   try {
-    await emailTransport.sendMail({ from: `"Social Dance TV" <${GMAIL_USER}>`, to, subject, html });
+    await sendEmail({ to, subject, html });
     console.log('Archive offer email sent to', to);
   } catch (err) { console.error('Archive offer email error:', err.message); }
 }
