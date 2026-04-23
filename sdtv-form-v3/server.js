@@ -50,7 +50,7 @@ const PREVIEW_DIR = path.join(__dirname, '.preview-cache');
 if (!existsSync(PREVIEW_DIR)) mkdirSync(PREVIEW_DIR, { recursive: true });
 
 const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
-if (!AIRTABLE_TOKEN) {
+if (!AIRTABLE_TOKEN && require.main === module) {
   console.error('FATAL: AIRTABLE_TOKEN env var required');
   process.exit(1);
 }
@@ -1902,6 +1902,18 @@ app.get('/pass/:ref', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`SDTV Client Form server running on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`SDTV Client Form server running on port ${PORT}`);
+  });
+}
+
+module.exports = {
+  sendDeliveryEmail,
+  sendNotifyConfirmEmail,
+  sendBookingConfirmEmail,
+  sendPaymentReceiptEmail,
+  sendVisibilityWelcomeEmail,
+  sendVideoReadyEmail,
+  sendArchiveOfferEmail,
+};
