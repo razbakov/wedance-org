@@ -27,9 +27,7 @@
     padding:40px 24px 80px;
     -webkit-font-smoothing:antialiased;
   }
-  .stage{
-    display:flex; flex-direction:column; align-items:center; gap:28px;
-  }
+  .stage{display:flex; flex-direction:column; align-items:center; gap:28px}
   .caption{
     text-align:center; color:#b8b4d4; font-size:13px; letter-spacing:.14em;
     font-weight:600; text-transform:uppercase;
@@ -47,34 +45,38 @@
       0 0 0 12px #0d0d18,
       0 0 0 13px rgba(255,255,255,.06);
   }
-  /* dynamic island */
   .island{
     position:absolute; top:11px; left:50%; transform:translateX(-50%);
     width:126px; height:37px; border-radius:24px; background:#000; z-index:60;
   }
-  /* status bar */
   .status{
     position:absolute; top:0; left:0; right:0; z-index:50;
     display:flex; align-items:center; justify-content:space-between;
     padding:20px 34px 0; color:var(--navy); font-weight:600; font-size:15px;
     font-family:-apple-system,"SF Pro",system-ui;
+    pointer-events:none;
   }
   .status__right{display:flex; gap:6px; align-items:center; color:var(--navy)}
   .status__right svg path, .status__right svg rect, .status__right svg circle{fill:currentColor}
-  /* home indicator */
   .home-ind{
     position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
     width:139px; height:5px; border-radius:99px; background:rgba(0,0,0,.25); z-index:60;
+    pointer-events:none;
   }
-  /* scroll viewport */
+
+  /* --- scroll viewport --- */
   .scr{
     position:absolute; inset:0; overflow-y:auto; overflow-x:hidden;
-    padding-top:58px; /* leave status bar + island */
-    padding-bottom:40px;
+    padding-top:52px; padding-bottom:40px;
   }
   .scr::-webkit-scrollbar{width:0}
 
-  /* ---- reusable ---- */
+  /* --- screens --- */
+  .screen{display:none}
+  .screen.active{display:block; animation:fadeIn .32s ease}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+  /* --- reusable --- */
   .pad{padding:0 16px}
   .tag{
     display:inline-flex; align-items:center; gap:6px;
@@ -85,17 +87,23 @@
   .tag--dark{background:rgba(255,255,255,.15); color:#fff}
   .tag--yellow{background:var(--yellow); color:var(--navy)}
   .tag--mint{background:var(--mint); color:var(--navy)}
+  .tag--coral{background:var(--coral); color:#fff}
   .btn{
     display:inline-flex; align-items:center; gap:8px;
     padding:14px 18px; border-radius:999px;
     font-family:inherit; font-weight:700; font-size:13.5px;
     border:none; cursor:pointer; box-shadow:0 6px 16px rgba(15,16,48,.18);
+    transition:transform .12s ease;
   }
+  .btn:active{transform:scale(.97)}
   .btn--yellow{background:var(--yellow); color:var(--navy)}
   .btn--yellow .a{background:var(--navy); color:var(--yellow)}
   .btn--dark{background:var(--navy); color:#fff}
   .btn--dark .a{background:var(--yellow); color:var(--navy)}
+  .btn--ghost{background:transparent; color:var(--navy); box-shadow:none; border:1px solid rgba(15,16,48,.2)}
+  .btn--ghost .a{background:var(--navy); color:#fff}
   .btn--full{width:100%; justify-content:center}
+  .btn[disabled]{opacity:.4; cursor:not-allowed}
   .a{
     width:20px; height:20px; border-radius:999px;
     display:inline-flex; align-items:center; justify-content:center;
@@ -104,17 +112,15 @@
   .img{width:100%; overflow:hidden; border-radius:18px; background:var(--bgSoft)}
   .img img{width:100%; height:100%; object-fit:cover; display:block}
 
-  /* ---- Floating nav pill ---- */
-  .m-nav{
-    position:sticky; top:54px; z-index:30; margin:0 12px; padding-top:6px;
-  }
+  /* --- Floating nav pill --- */
+  .m-nav{position:sticky; top:52px; z-index:30; margin:0 12px; padding-top:6px}
   .m-nav__inner{
     display:flex; align-items:center; justify-content:space-between;
     background:#fff; border-radius:999px;
     padding:6px 6px 6px 14px;
     box-shadow:0 10px 30px rgba(63,58,255,.16);
   }
-  .logo{display:flex; align-items:center; gap:8px}
+  .logo{display:flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer; padding:0}
   .logo__mark{
     width:26px; height:26px; border-radius:7px; background:var(--navy);
     color:var(--yellow); display:inline-flex; align-items:center; justify-content:center;
@@ -125,18 +131,57 @@
   .burger{
     width:36px; height:36px; border-radius:999px; background:var(--navy); color:var(--yellow);
     display:inline-flex; align-items:center; justify-content:center;
-    border:none; font-size:14px;
+    border:none; font-size:16px; cursor:pointer;
   }
   .burger-cta{
     background:var(--yellow); color:var(--navy);
     padding:8px 12px; border-radius:999px; font-weight:700; font-size:12px;
-    display:inline-flex; align-items:center; gap:6px; border:none;
+    display:inline-flex; align-items:center; gap:6px; border:none; cursor:pointer;
+    font-family:inherit;
   }
   .burger-cta .a{background:var(--navy); color:var(--yellow); width:16px; height:16px; font-size:9px}
 
+  /* --- Drawer --- */
+  .drawer-scrim{
+    position:absolute; inset:0; z-index:70; background:rgba(10,10,20,.5);
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .drawer-scrim.open{opacity:1; pointer-events:auto}
+  .drawer{
+    position:absolute; top:0; right:0; bottom:0; width:86%; z-index:71;
+    background:var(--navy); color:#fff; padding:64px 28px 32px;
+    transform:translateX(100%); transition:transform .32s cubic-bezier(.5,.1,.25,1);
+    display:flex; flex-direction:column;
+  }
+  .drawer.open{transform:none}
+  .drawer__close{
+    position:absolute; top:18px; right:18px;
+    width:40px; height:40px; border-radius:999px;
+    background:rgba(255,255,255,.1); color:#fff; border:none;
+    font-size:22px; cursor:pointer;
+  }
+  .drawer__eyebrow{font-size:11px; letter-spacing:.16em; font-weight:700; color:var(--yellow); margin:0 0 24px}
+  .drawer__links{display:flex; flex-direction:column; gap:4px; margin-bottom:auto}
+  .drawer__link{
+    background:none; border:none; padding:18px 0; text-align:left;
+    color:#fff; font-size:28px; font-weight:800; letter-spacing:-.02em;
+    font-family:inherit; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .drawer__link.active{color:var(--yellow)}
+  .drawer__link .arr{
+    color:rgba(255,255,255,.35); font-size:18px; font-weight:400;
+  }
+  .drawer__link.active .arr{color:var(--yellow)}
+  .drawer__foot{margin-top:28px; padding-top:24px; border-top:1px solid rgba(255,255,255,.1)}
+  .drawer__foot p{font-size:13px; line-height:1.55; color:rgba(255,255,255,.72); margin:0 0 16px}
+  .drawer__contact{font-size:13px; color:rgba(255,255,255,.85); margin-bottom:6px}
+  .drawer__contact strong{color:var(--yellow); font-weight:600; display:block; font-size:11px; letter-spacing:.14em; margin-bottom:2px}
+
   /* ---- HERO ---- */
   .hero{
-    margin:16px 12px 0; border-radius:28px; overflow:hidden; color:#fff;
+    margin:12px 12px 0; border-radius:28px; overflow:hidden; color:#fff;
     background:linear-gradient(160deg,var(--indigo) 0%, var(--indigoLo) 55%, #8079FF 100%);
     padding:22px 18px 20px; position:relative;
   }
@@ -150,7 +195,7 @@
   .hero__h1{
     position:relative;
     font-size:52px; font-weight:800; line-height:.92;
-    margin:18px 0 0; letter-spacing:-.035em;
+    margin:14px 0 0; letter-spacing:-.035em;
     text-shadow:0 12px 36px rgba(15,16,48,.3);
   }
   .hero__h1 span{color:var(--yellow)}
@@ -163,7 +208,16 @@
   .hero__seeMore{
     display:block; text-align:center; padding:10px 4px;
     color:rgba(255,255,255,.75); font-size:12.5px; font-weight:600;
-    letter-spacing:.02em; text-decoration:none;
+    letter-spacing:.02em; text-decoration:none; background:none; border:none;
+    font-family:inherit; cursor:pointer;
+  }
+  .promo__c{flex:1}
+  .promo__nBlock{text-align:right; line-height:1; flex-shrink:0}
+  .promo__nLbl{font-size:8px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; opacity:.65; margin-top:4px; line-height:1.25}
+  .eco__mr{
+    background:var(--yellow); color:var(--navy);
+    padding:3px 8px; border-radius:999px;
+    font-size:8.5px; font-weight:700; letter-spacing:.08em; white-space:nowrap;
   }
   .hero__social{
     position:relative; margin-top:14px; display:flex; align-items:center; gap:10px;
@@ -177,7 +231,6 @@
   .avs img:first-child{margin-left:0}
   .hero__socialMeta{font-size:11px; color:rgba(255,255,255,.8); line-height:1.4}
   .hero__socialMeta strong{color:#fff}
-
   .hero__tiles{position:relative; margin-top:16px; display:flex; flex-direction:column; gap:10px}
   .hero__tiles .img{aspect-ratio:16/11; border-radius:20px}
   .hero__tiles .img--portrait{aspect-ratio:4/5}
@@ -185,11 +238,9 @@
     background:var(--yellow); color:var(--navy); border-radius:18px;
     padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;
   }
-  .promo__c{font-size:12px; font-weight:600; line-height:1.35; flex:1}
+  .promo__c{font-size:12px; font-weight:600; line-height:1.35}
   .promo__c span{opacity:.7; font-weight:500; font-size:11px}
-  .promo__nBlock{text-align:right; line-height:1; flex-shrink:0}
   .promo__n{font-size:36px; font-weight:800; letter-spacing:-.03em; line-height:1}
-  .promo__nLbl{font-size:8px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; opacity:.65; margin-top:4px; line-height:1.25}
 
   /* ---- TRUST ---- */
   .trust-pad{padding:32px 12px 0}
@@ -201,21 +252,57 @@
     font-size:10px; font-weight:700; letter-spacing:.18em;
     color:rgba(15,16,48,.55); margin-bottom:10px;
   }
-  .trust__logos{
-    display:flex; flex-wrap:wrap; gap:14px 22px;
-  }
-  .trust__logo{
-    font-family:'Fraunces',serif; font-weight:700; color:var(--navy);
-    font-size:15px; opacity:.72;
-  }
+  .trust__logos{display:flex; flex-wrap:wrap; gap:14px 22px}
+  .trust__logo{font-family:'Fraunces',serif; font-weight:700; color:var(--navy); font-size:15px; opacity:.72}
 
   /* ---- INTRO ---- */
   .sec{padding-top:44px}
   .sec-eyebrow{font-size:11px; font-weight:700; letter-spacing:.14em; color:var(--indigo); margin-bottom:14px}
-  .intro__portrait{width:120px; margin-bottom:14px}
-  .intro__portrait .img{aspect-ratio:4/5; border-radius:16px}
-  .intro__meta{font-size:11px; color:rgba(15,16,48,.6); line-height:1.5; margin-bottom:16px}
-  .intro__meta strong{color:var(--navy); font-weight:700}
+
+  .intro-card{
+    position:relative; background:#fff; border-radius:24px; overflow:hidden;
+    box-shadow:0 14px 40px rgba(15,16,48,.08);
+  }
+  .intro-card__top{
+    position:relative; aspect-ratio:4/3;
+    background:linear-gradient(155deg, var(--bgSoft) 0%, #c9c4ff 100%);
+  }
+  .intro-card__top img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 20%;
+  }
+  .intro-card__scrim{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,0) 55%, rgba(255,255,255,.92) 100%);
+  }
+  .intro-card__kicker{
+    position:absolute; top:14px; left:14px; right:14px;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+  }
+  .intro-card__who{
+    position:absolute; left:16px; right:16px; bottom:14px;
+    display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+  }
+  .intro-card__name{font-size:18px; font-weight:800; color:var(--navy); letter-spacing:-.015em; line-height:1.1}
+  .intro-card__role{font-size:11px; color:rgba(15,16,48,.6); margin-top:2px}
+  .intro-card__sig{
+    font-family:'Fraunces',serif; font-style:italic; font-size:18px;
+    color:var(--indigo); font-weight:600; opacity:.85; letter-spacing:-.01em;
+  }
+  .intro-card__body{padding:22px 20px 20px}
+  .intro-card__lead{
+    font-size:22px; font-weight:600; line-height:1.2;
+    color:var(--navy); letter-spacing:-.02em; margin:0 0 16px; text-wrap:pretty;
+  }
+  .intro-card__lead mark{background:var(--yellow); color:inherit; padding:1px 4px; border-radius:2px}
+  .intro-card__meta{
+    display:flex; gap:14px; padding:14px 0 0;
+    border-top:1px solid rgba(15,16,48,.08);
+  }
+  .intro-card__stat{flex:1}
+  .intro-card__stat + .intro-card__stat{border-left:1px solid rgba(15,16,48,.08); padding-left:14px}
+  .intro-card__stat b{display:block; font-size:20px; font-weight:800; color:var(--navy); letter-spacing:-.02em; line-height:1}
+  .intro-card__stat span{display:block; font-size:10.5px; color:rgba(15,16,48,.55); margin-top:4px; font-weight:500; letter-spacing:.02em}
+  .intro-tags{margin-top:16px; display:flex; gap:6px; flex-wrap:wrap}
   .intro__lead{
     font-size:26px; font-weight:600; line-height:1.15;
     color:var(--navy); letter-spacing:-.02em; margin:0; text-wrap:pretty;
@@ -258,24 +345,24 @@
   .eco__btn{
     width:100%; display:flex; align-items:center; gap:10px; padding:12px 10px;
     background:transparent; color:var(--navy); border:none; border-radius:999px;
-    text-align:left; font-family:inherit;
+    text-align:left; font-family:inherit; cursor:pointer;
   }
   .eco__num{font-size:10px; opacity:.65; width:22px; font-weight:600}
   .eco__title{flex:1; font-size:15px; font-weight:700; letter-spacing:-.01em}
-  .eco__mr{
-    background:var(--yellow); color:var(--navy);
-    padding:3px 8px; border-radius:999px;
-    font-size:8.5px; font-weight:700; letter-spacing:.08em; white-space:nowrap;
-  }
   .eco__icon{
     width:26px; height:26px; border-radius:999px;
     display:inline-flex; align-items:center; justify-content:center;
     border:1px solid rgba(15,16,48,.2); font-size:15px; color:var(--navy); background:transparent;
+    transition:transform .25s ease;
   }
-  .eco__desc{padding:4px 42px 14px; color:rgba(15,16,48,.7); font-size:12.5px; line-height:1.55; display:none}
+  .eco__desc{
+    max-height:0; overflow:hidden; padding:0 42px;
+    color:rgba(15,16,48,.7); font-size:12.5px; line-height:1.55;
+    transition:max-height .3s ease, padding .3s ease;
+  }
   .eco__row.open .eco__btn{background:var(--navy); color:#fff}
-  .eco__row.open .eco__icon{background:var(--yellow); border:none}
-  .eco__row.open .eco__desc{display:block}
+  .eco__row.open .eco__icon{background:var(--yellow); border:none; transform:rotate(45deg)}
+  .eco__row.open .eco__desc{max-height:200px; padding:4px 42px 14px}
 
   /* ---- RESULTS ---- */
   .results-wrap{padding:44px 12px 0}
@@ -283,11 +370,16 @@
   .results__h2{font-size:32px; font-weight:800; line-height:1.02; margin:10px 0 0; letter-spacing:-.025em}
   .results__h2 span{color:var(--yellow)}
   .results__grid{display:flex; flex-direction:column; gap:10px; margin-top:20px}
-  .caseCard{position:relative; border-radius:18px; overflow:hidden}
+  .caseCard{position:relative; border-radius:18px; overflow:hidden; cursor:pointer; background:none; border:none; padding:0; width:100%; text-align:left; font-family:inherit}
   .caseCard .img{aspect-ratio:16/10; border-radius:18px}
-  .caseCard__scrim{position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,0) 40%, rgba(0,0,0,.85) 100%)}
+  .caseCard__scrim{position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,0) 40%, rgba(0,0,0,.85) 100%); pointer-events:none}
   .caseCard__tag{position:absolute; top:12px; left:12px}
-  .caseCard__bot{position:absolute; left:14px; right:14px; bottom:14px}
+  .caseCard__arr{
+    position:absolute; top:12px; right:12px;
+    width:30px; height:30px; border-radius:10px; background:var(--yellow); color:var(--navy);
+    display:inline-flex; align-items:center; justify-content:center; font-weight:800;
+  }
+  .caseCard__bot{position:absolute; left:14px; right:14px; bottom:14px; color:#fff}
   .caseCard__delta{font-size:20px; font-weight:800; letter-spacing:-.02em}
   .caseCard__note{font-size:11px; color:rgba(255,255,255,.7); margin-top:2px}
   .results__cta{margin-top:18px}
@@ -356,7 +448,7 @@
   .step--coral .step__arr{background:rgba(255,255,255,.22)}
   .step__title{font-size:19px; font-weight:800; letter-spacing:-.01em; margin-bottom:6px}
   .step__desc{font-size:12.5px; line-height:1.55; margin:0 0 14px; opacity:.85}
-  .step .img{aspect-ratio:16/10; border-radius:12px; margin:0 -18px; width:calc(100% + 36px); border-radius:0}
+  .step .img{aspect-ratio:16/10; margin:0 -18px; width:calc(100% + 36px); border-radius:0}
 
   /* ---- MEASUREMENT ---- */
   .meas-wrap{padding:44px 12px 0}
@@ -371,13 +463,12 @@
   .meas__qt{font-size:13px; font-weight:500; line-height:1.4}
 
   /* ---- STICKY BOTTOM CTA BAR ---- */
-  .stickyCTA{
-    position:sticky; bottom:12px; margin:18px 12px 0; z-index:25;
-  }
+  .stickyCTA{position:sticky; bottom:12px; margin:18px 12px 0; z-index:25}
   .stickyCTA__inner{
     background:var(--navy); color:#fff; border-radius:22px;
     padding:10px 10px 10px 18px; display:flex; align-items:center; justify-content:space-between; gap:10px;
     box-shadow:0 14px 40px rgba(15,16,48,.35);
+    backdrop-filter:blur(8px);
   }
   .stickyCTA__meta{font-size:12px; line-height:1.3}
   .stickyCTA__meta strong{color:var(--yellow); display:block; font-size:13px}
@@ -390,8 +481,174 @@
   .foot__tag{font-size:13px; line-height:1.55; color:rgba(15,16,48,.72); margin:0 0 16px}
   .foot__cols{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:22px; padding-top:22px; border-top:1px solid rgba(15,16,48,.12)}
   .foot__col h4{font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--indigo); margin:0 0 10px}
-  .foot__col a{display:block; color:var(--navy); font-size:12.5px; margin-bottom:6px; text-decoration:none}
+  .foot__col button{display:block; color:var(--navy); font-size:12.5px; margin-bottom:6px; text-decoration:none; background:none; border:none; font-family:inherit; padding:0; cursor:pointer; text-align:left}
+  .foot__col button:hover{color:var(--indigo)}
   .foot__bot{font-size:10px; color:rgba(15,16,48,.55); margin-top:20px; padding-top:16px; border-top:1px solid rgba(15,16,48,.12); display:flex; justify-content:space-between}
+
+  /* ---- APPLY form ---- */
+  .apply-hero{
+    margin:12px 12px 0; border-radius:28px; overflow:hidden; color:#fff;
+    background:linear-gradient(160deg,var(--indigo) 0%, var(--indigoLo) 55%, #8079FF 100%);
+    padding:22px 18px;
+  }
+  .apply-hero__h1{font-size:38px; font-weight:800; line-height:.95; letter-spacing:-.03em; margin:14px 0 0}
+  .apply-hero__h1 span{color:var(--yellow)}
+  .apply-hero__meta{display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:11px}
+  .apply-hero__meta .opa{opacity:.8}
+  .apply-hero__step{color:var(--yellow); font-weight:700; letter-spacing:.1em}
+  .progress{margin-top:12px; height:6px; background:rgba(255,255,255,.18); border-radius:6px; overflow:hidden}
+  .progress > div{height:100%; background:var(--yellow); transition:width .3s ease}
+
+  .apply-card{
+    margin:16px 12px 0; background:#fff; border-radius:22px; padding:24px 18px;
+    box-shadow:0 12px 30px rgba(15,16,48,.1); min-height:360px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .apply-card h3{
+    font-size:22px; font-weight:800; letter-spacing:-.02em; color:var(--navy);
+    margin:0; line-height:1.15;
+  }
+  .apply-card p.sub{
+    font-size:13px; color:rgba(15,16,48,.65); line-height:1.5; margin:-6px 0 0;
+  }
+
+  .field{display:flex; flex-direction:column; gap:6px}
+  .field label{font-size:10.5px; font-weight:700; letter-spacing:.12em; color:var(--indigo)}
+  .field input, .field textarea, .field select{
+    width:100%; font-family:inherit; font-size:14px; color:var(--navy);
+    background:var(--bg); border:1px solid transparent; border-radius:12px;
+    padding:14px 14px; outline:none; transition:border-color .15s ease, background .15s ease;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{
+    border-color:var(--indigo); background:#fff;
+  }
+  .field textarea{min-height:80px; resize:vertical; line-height:1.5}
+
+  .chips{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .chip{
+    background:var(--bg); border:1px solid transparent; border-radius:14px;
+    padding:12px 12px; font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--navy); cursor:pointer; text-align:left; display:flex; gap:8px; align-items:center;
+  }
+  .chip .num{font-size:10px; opacity:.55; font-weight:700}
+  .chip.active{background:var(--navy); color:#fff; border-color:var(--navy)}
+  .chip.active .num{color:var(--yellow); opacity:1}
+
+  .tier-pick{display:flex; flex-direction:column; gap:10px}
+  .tier-option{
+    border:1px solid rgba(15,16,48,.12); border-radius:16px; padding:16px;
+    background:#fff; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+    gap:12px; font-family:inherit; text-align:left;
+  }
+  .tier-option.active{border-color:var(--indigo); background:var(--bg); box-shadow:0 0 0 3px rgba(63,58,255,.1)}
+  .tier-option__name{font-size:15px; font-weight:800; color:var(--navy); letter-spacing:-.01em}
+  .tier-option__price{font-size:13px; color:var(--indigo); font-weight:700; margin-top:2px}
+  .tier-option__desc{font-size:11px; color:rgba(15,16,48,.6); margin-top:4px; line-height:1.4}
+  .tier-option__check{
+    width:22px; height:22px; border-radius:999px; border:1.5px solid rgba(15,16,48,.2);
+    display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .tier-option.active .tier-option__check{background:var(--indigo); border-color:var(--indigo); color:#fff}
+  .tier-option.active .tier-option__check::after{content:"✓"; font-size:12px; font-weight:700}
+
+  .apply-actions{
+    display:flex; gap:10px; margin:16px 12px 0;
+  }
+  .apply-actions .btn{flex:1}
+  .btn--back{
+    background:transparent; border:1px solid rgba(15,16,48,.2); color:var(--navy); box-shadow:none;
+  }
+
+  /* ---- SENT screen ---- */
+  .sent-wrap{
+    height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:40px 24px; text-align:center; gap:18px;
+  }
+  .sent-check{
+    width:80px; height:80px; border-radius:999px; background:var(--yellow); color:var(--navy);
+    display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:800;
+    box-shadow:0 14px 40px rgba(255,212,65,.4);
+  }
+  .sent-h2{font-size:36px; font-weight:800; letter-spacing:-.03em; color:var(--navy); line-height:1; margin:0}
+  .sent-h2 span{color:var(--indigo)}
+  .sent-sub{font-size:14px; line-height:1.55; color:rgba(15,16,48,.65); max-width:32ch; margin:0}
+
+  /* ---- WORK page ---- */
+  .work-hero{
+    margin:12px 12px 0; border-radius:28px;
+    background:var(--bgSoft); color:var(--navy); padding:24px 18px;
+  }
+  .work-hero h1{font-size:38px; font-weight:800; line-height:.95; letter-spacing:-.03em; margin:12px 0 0}
+  .work-hero h1 span{color:var(--indigo)}
+  .work-hero p{font-size:13px; line-height:1.55; color:rgba(15,16,48,.7); margin:14px 0 0}
+  .work-filter{display:flex; gap:8px; margin:18px 12px 0; overflow-x:auto; padding-bottom:4px}
+  .work-filter::-webkit-scrollbar{display:none}
+  .filter-chip{
+    background:#fff; border:1px solid rgba(15,16,48,.1); border-radius:999px;
+    padding:8px 14px; font-family:inherit; font-size:12px; font-weight:600; color:var(--navy);
+    white-space:nowrap; cursor:pointer;
+  }
+  .filter-chip.active{background:var(--navy); color:#fff; border-color:var(--navy)}
+  .work-grid{display:flex; flex-direction:column; gap:12px; padding:18px 12px 0}
+  .work-card{
+    background:#fff; border-radius:22px; overflow:hidden; cursor:pointer;
+    box-shadow:0 10px 30px rgba(15,16,48,.08);
+    display:flex; flex-direction:column; text-align:left; border:none; padding:0; font-family:inherit; width:100%;
+  }
+  .work-card .img{aspect-ratio:4/3; border-radius:0}
+  .work-card__body{padding:16px 16px 18px}
+  .work-card__who{font-size:11px; color:var(--indigo); font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px}
+  .work-card__t{font-size:18px; font-weight:700; color:var(--navy); letter-spacing:-.015em; line-height:1.2; margin-bottom:10px}
+  .work-card__delta{display:inline-block; background:var(--bgSoft); color:var(--navy); padding:8px 12px; border-radius:999px; font-size:12px; font-weight:600}
+
+  /* ---- ABOUT page ---- */
+  .about-hero{
+    margin:12px 12px 0; border-radius:28px;
+    background:var(--bgSoft); color:var(--navy); padding:24px 18px;
+  }
+  .about-hero h1{font-size:38px; font-weight:800; line-height:.95; letter-spacing:-.03em; margin:12px 0 0}
+  .about-hero h1 span{color:var(--indigo)}
+  .about-hero p{font-size:13px; line-height:1.6; color:rgba(15,16,48,.72); margin:14px 0 0}
+  .about-quote{
+    margin:24px 12px 0; background:#fff; border-radius:22px; padding:22px 18px;
+    box-shadow:0 10px 30px rgba(15,16,48,.08);
+  }
+  .about-quote h2{
+    font-size:22px; font-weight:700; line-height:1.25; color:var(--navy);
+    letter-spacing:-.015em; margin:0 0 16px;
+  }
+  .about-quote h2 mark{background:var(--yellow); color:inherit; padding:0 4px}
+  .about-quote .who{display:flex; align-items:center; gap:10px; padding-top:14px; border-top:1px solid rgba(15,16,48,.1)}
+  .about-quote img{width:40px; height:40px; border-radius:50%; object-fit:cover}
+  .about-quote .name{font-size:13px; font-weight:700; color:var(--navy)}
+  .about-quote .role{font-size:11px; color:rgba(15,16,48,.6)}
+  .principles{padding:32px 12px 0}
+  .principles h3{font-size:24px; font-weight:800; color:var(--navy); letter-spacing:-.02em; margin:0 0 14px}
+  .principles h3 span{color:var(--indigo)}
+  .principle{background:#fff; border-radius:18px; padding:20px 18px; margin-bottom:10px; box-shadow:0 8px 24px rgba(15,16,48,.06)}
+  .principle__n{font-size:10px; color:var(--indigo); letter-spacing:.12em; font-weight:700; margin-bottom:8px}
+  .principle__t{font-size:17px; font-weight:700; color:var(--navy); letter-spacing:-.01em; margin:0 0 8px; line-height:1.2}
+  .principle__d{font-size:12.5px; color:rgba(15,16,48,.65); line-height:1.55; margin:0}
+
+  /* ---- SERVICES page (extends home list) ---- */
+  .services-hero{
+    margin:12px 12px 0; border-radius:28px;
+    background:linear-gradient(160deg,var(--indigo) 0%, var(--indigoLo) 55%, #8079FF 100%);
+    color:#fff; padding:24px 18px;
+  }
+  .services-hero h1{font-size:40px; font-weight:800; line-height:.95; letter-spacing:-.03em; margin:12px 0 0}
+  .services-hero h1 span{color:var(--yellow)}
+  .services-hero p{font-size:13px; line-height:1.55; color:rgba(255,255,255,.82); margin:14px 0 0}
+
+  /* toast */
+  .toast{
+    position:absolute; bottom:80px; left:50%; transform:translate(-50%, 20px);
+    background:var(--navy); color:#fff; padding:12px 18px; border-radius:999px;
+    font-size:12.5px; font-weight:600; z-index:90;
+    box-shadow:0 14px 40px rgba(0,0,0,.35);
+    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+  }
+  .toast.show{opacity:1; transform:translate(-50%, 0); pointer-events:auto}
 </style>
 </head>
 <body>
@@ -409,322 +666,803 @@
         <svg width="24" height="11" viewBox="0 0 24 11"><rect x=".5" y=".5" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".4"/><rect x="2" y="2" width="18" height="7" rx="1.6"/><path d="M22.5 4v3c.7-.2 1.2-.8 1.2-1.5S23.2 4.2 22.5 4z" opacity=".4"/></svg>
       </div>
     </div>
-    <div class="home-ind"></div>
 
-    <div class="scr">
-      <!-- NAV -->
+    <!-- Scroll viewport -->
+    <div class="scr" id="scr">
+
+      <!-- Shared top nav pill -->
       <div class="m-nav">
         <div class="m-nav__inner">
-          <div class="logo">
+          <button class="logo" data-go="home">
             <span class="logo__mark">K</span>
             <span class="logo__text">Kravchenko<span>.</span></span>
-          </div>
+          </button>
           <div style="display:flex; gap:6px; align-items:center">
-            <button class="burger-cta">Apply <span class="a">→</span></button>
-            <button class="burger" aria-label="Menu">≡</button>
+            <button class="burger-cta" data-go="apply">Apply <span class="a">→</span></button>
+            <button class="burger" id="burger" aria-label="Menu">≡</button>
           </div>
         </div>
       </div>
 
-      <!-- HERO -->
-      <section class="hero" style="margin-top:22px">
-        <div class="hero__ghost" aria-hidden="true">STUDIO</div>
-        <div class="hero__top">
-          <span class="tag tag--dark" style="align-self:flex-start">● Cohort 08 · Feb 2026</span>
-        </div>
-        <h1 class="hero__h1">Turn the scroll<br/><span>into the sale.</span></h1>
-        <p class="hero__sub">For founders and experts whose public image needs to match <strong>the level they operate at</strong>.</p>
-        <div class="hero__ctas">
-          <button class="btn btn--yellow btn--full">Apply for your audit <span class="a">→</span></button>
-          <a href="#results" class="hero__seeMore">See transformations ↓</a>
-        </div>
-        <div class="hero__social">
-          <div class="avs">
-            <img src="https://i.pravatar.cc/64?img=5" alt=""/>
-            <img src="https://i.pravatar.cc/64?img=12" alt=""/>
-            <img src="https://i.pravatar.cc/64?img=32" alt=""/>
-            <img src="https://i.pravatar.cc/64?img=47" alt=""/>
+      <!-- ============ HOME ============ -->
+      <div class="screen active" id="page-home">
+        <section class="hero" style="margin-top:10px">
+          <div class="hero__ghost" aria-hidden="true">STUDIO</div>
+          <div class="hero__top">
+            <span class="tag tag--dark" style="align-self:flex-start">● Cohort 08 · Feb 2026</span>
           </div>
-          <div class="hero__socialMeta"><strong>82 founders · 14 countries</strong><br/>since 2021</div>
-        </div>
-
-        <div class="hero__tiles">
-          <div class="img img--portrait"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=900&q=80&auto=format&fit=crop" alt=""/></div>
-          <div class="img"><img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=900&q=80&auto=format&fit=crop" alt=""/></div>
-          <div class="promo">
-            <div class="promo__c">We take on four clients each month.<br/><span>Apply — reply within 48h with our recommendation.</span></div>
-            <div class="promo__nBlock">
-              <div class="promo__n">4</div>
-              <div class="promo__nLbl">Client slots<br/>/ month</div>
+          <h1 class="hero__h1">Turn the scroll<br/><span>into the sale.</span></h1>
+          <p class="hero__sub">For founders and experts whose public image needs to match <strong>the level they operate at</strong>.</p>
+          <div class="hero__ctas">
+            <button class="btn btn--yellow btn--full" data-go="apply">Apply for your audit <span class="a">→</span></button>
+            <button class="hero__seeMore" data-go="work">See transformations ↓</button>
+          </div>
+          <div class="hero__social">
+            <div class="avs">
+              <img src="https://i.pravatar.cc/64?img=5" alt=""/>
+              <img src="https://i.pravatar.cc/64?img=12" alt=""/>
+              <img src="https://i.pravatar.cc/64?img=32" alt=""/>
+              <img src="https://i.pravatar.cc/64?img=47" alt=""/>
             </div>
+            <div class="hero__socialMeta"><strong>82 founders · 14 countries</strong><br/>since 2021</div>
           </div>
-        </div>
-      </section>
 
-      <!-- TRUST -->
-      <div class="trust-pad">
-        <div class="trust">
-          <div class="trust__label">AS SEEN IN</div>
-          <div class="trust__logos">
-            <span class="trust__logo">El País</span>
-            <span class="trust__logo">Monocle</span>
-            <span class="trust__logo">Kinfolk</span>
-            <span class="trust__logo">Forbes</span>
-            <span class="trust__logo">Cereal</span>
-            <span class="trust__logo">Apartamento</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- INTRO -->
-      <section class="sec pad">
-        <div class="sec-eyebrow">WE DON'T JUST SHOOT —<br/>WE REPOSITION.</div>
-        <div class="intro__portrait">
-          <div class="img"><img src="./uploads/Founder.jpg" alt="Kirill Korshikov"/></div>
-        </div>
-        <div class="intro__meta"><strong>Kirill Korshikov</strong><br/>Creative director · Studio founder</div>
-        <p class="intro__lead">
-          We help founders and experts build an image that matches the level they operate at.
-        </p>
-        <p class="intro__lead" style="margin-top:14px">
-          From brand clarity to content direction and production, we build a presence<br/><mark>people trust before the first call</mark>.
-        </p>
-        <div class="intro__tags">
-          <span class="tag tag--yellow">● Positioning</span>
-          <span class="tag tag--light">Photography</span>
-          <span class="tag tag--light">Content system</span>
-          <span class="tag tag--mint">● Since '21</span>
-        </div>
-      </section>
-
-      <!-- STATS -->
-      <section class="sec pad">
-        <div class="stats">
-          <div class="stat stat--yellow">
-            <div class="stat__top"><div class="stat__label">Founders scaled</div><div class="stat__arr">↗</div></div>
-            <div><div class="stat__value">82+</div><div class="stat__note">Since 2021</div></div>
-          </div>
-          <div class="stat stat--coral">
-            <div class="stat__top"><div class="stat__label">Audience growth</div><div class="stat__arr">↗</div></div>
-            <div><div class="stat__value">3M+</div><div class="stat__note">Aggregate reach</div></div>
-          </div>
-          <div class="stat stat--mint">
-            <div class="stat__top"><div class="stat__label">Lead quality</div><div class="stat__arr">↗</div></div>
-            <div><div class="stat__value">5×</div><div class="stat__note">Pre vs. post</div></div>
-          </div>
-          <div class="stat stat--navy">
-            <div class="stat__top"><div class="stat__label">Press features</div><div class="stat__arr">↗</div></div>
-            <div><div class="stat__value">47</div><div class="stat__note">Tier-1 outlets</div></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ECOSYSTEM -->
-      <section class="sec pad">
-        <span class="tag tag--yellow">● 05 Levers of Public Trust</span>
-        <h2 class="eco__h2">Everything your <span>public image</span> needs.</h2>
-        <p class="eco__sub">Not a menu. An ecosystem. Five disciplines that only ship together.</p>
-        <div class="eco__list">
-          <div class="eco__row open"><button class="eco__btn" onclick="toggleEco(this)"><span class="eco__num">01</span><span class="eco__title">Positioning</span><span class="eco__icon">–</span></button><div class="eco__desc">So people stop guessing what you do and start understanding your value faster.</div></div>
-          <div class="eco__row"><button class="eco__btn" onclick="toggleEco(this)"><span class="eco__num">02</span><span class="eco__title">Content direction</span><span class="eco__mr">MOST REQUESTED</span><span class="eco__icon">+</span></button><div class="eco__desc">So your content stops feeling random and starts strengthening your reputation.</div></div>
-          <div class="eco__row"><button class="eco__btn" onclick="toggleEco(this)"><span class="eco__num">03</span><span class="eco__title">Brand clarity</span><span class="eco__icon">+</span></button><div class="eco__desc">So every touchpoint feels like the same credible person, not five different versions of you.</div></div>
-          <div class="eco__row"><button class="eco__btn" onclick="toggleEco(this)"><span class="eco__num">04</span><span class="eco__title">Visual identity</span><span class="eco__icon">+</span></button><div class="eco__desc">So your image looks more premium, more intentional, and more aligned with your level.</div></div>
-          <div class="eco__row"><button class="eco__btn" onclick="toggleEco(this)"><span class="eco__num">05</span><span class="eco__title">Presence strategy</span><span class="eco__icon">+</span></button><div class="eco__desc">So your new positioning shows up in the market instead of staying a good idea.</div></div>
-        </div>
-      </section>
-
-      <!-- RESULTS -->
-      <div class="results-wrap" id="results">
-        <section class="results">
-          <span class="tag tag--dark">● Case studies</span>
-          <h2 class="results__h2">Results that speak<br/>louder than <span>words.</span></h2>
-          <div class="results__grid">
-            <div class="caseCard">
-              <div class="img"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=900&q=80&auto=format&fit=crop" alt=""/></div>
-              <div class="caseCard__scrim"></div>
-              <div class="caseCard__tag"><span class="tag tag--dark">Fintech Founder</span></div>
-              <div class="caseCard__bot"><div class="caseCard__delta">0 → 100K followers</div><div class="caseCard__note">Invisible → oversubscribed round</div></div>
+          <div class="hero__tiles">
+            <div class="img img--portrait"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=900&q=80&auto=format&fit=crop" alt=""/></div>
+            <div class="img"><img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=900&q=80&auto=format&fit=crop" alt=""/></div>
+            <div class="promo">
+              <div class="promo__c">We take on four clients each month.<br/><span>Apply — reply within 48h with our recommendation.</span></div>
+              <div class="promo__nBlock">
+                <div class="promo__n">4</div>
+                <div class="promo__nLbl">Client slots<br/>/ month</div>
+              </div>
             </div>
-            <div class="caseCard">
-              <div class="img"><img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=900&q=80&auto=format&fit=crop" alt=""/></div>
-              <div class="caseCard__scrim"></div>
-              <div class="caseCard__tag"><span class="tag tag--dark">Aesthetic Derm</span></div>
-              <div class="caseCard__bot"><div class="caseCard__delta">3× revenue growth</div><div class="caseCard__note">Cold search → 4-month waitlist</div></div>
-            </div>
-            <div class="caseCard">
-              <div class="img"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80&auto=format&fit=crop" alt=""/></div>
-              <div class="caseCard__scrim"></div>
-              <div class="caseCard__tag"><span class="tag tag--dark">Executive Coach</span></div>
-              <div class="caseCard__bot"><div class="caseCard__delta">2 enterprise contracts</div><div class="caseCard__note">Referral-only → inbound leader</div></div>
-            </div>
-          </div>
-          <div class="results__cta"><button class="btn btn--yellow btn--full">View all 29 cases <span class="a">→</span></button></div>
-        </section>
-      </div>
-
-      <!-- SERVICES -->
-      <section class="sec pad">
-        <span class="tag tag--yellow">● Services</span>
-        <h2 class="svc__h2">Three ways in.<br/><span>You, obvious.</span></h2>
-        <div class="tier tier--soft">
-          <div class="tier__tag">01 · ENTRY</div>
-          <div><div class="tier__name">Opening</div><div class="tier__price">€6 500</div></div>
-          <div class="tier__rule"></div>
-          <ul class="tier__list">
-            <li><span class="tick">✓</span>90-min positioning session</li>
-            <li><span class="tick">✓</span>Half-day studio shoot — 30 finals</li>
-            <li><span class="tick">✓</span>Brand voice one-pager</li>
-          </ul>
-          <div class="tier__outcome">"One clear message. One consistent face."</div>
-          <button class="btn btn--dark btn--full">Choose Opening <span class="a">→</span></button>
-        </div>
-        <div class="tier tier--navy">
-          <div class="tier__badge">Most chosen</div>
-          <div class="tier__tag">02 · FLAGSHIP</div>
-          <div><div class="tier__name">Signature</div><div class="tier__price">€18 000</div></div>
-          <div class="tier__rule"></div>
-          <ul class="tier__list">
-            <li><span class="tick">✓</span>2-day positioning intensive</li>
-            <li><span class="tick">✓</span>Full production day — team of 5</li>
-            <li><span class="tick">✓</span>120+ finals across 4 settings</li>
-            <li><span class="tick">✓</span>12-week content rollout plan</li>
-          </ul>
-          <div class="tier__outcome">"A personal brand that books meetings while you sleep."</div>
-          <button class="btn btn--yellow btn--full">Choose Signature <span class="a">→</span></button>
-        </div>
-        <div class="tier tier--yellow">
-          <div class="tier__tag">03 · ONGOING</div>
-          <div><div class="tier__name">Retainer</div><div class="tier__price">€4 800/mo</div></div>
-          <div class="tier__rule"></div>
-          <ul class="tier__list">
-            <li><span class="tick">✓</span>Monthly shoot day</li>
-            <li><span class="tick">✓</span>Content strategy &amp; review</li>
-            <li><span class="tick">✓</span>Press &amp; podcast pitching</li>
-          </ul>
-          <div class="tier__outcome">"You show up. We handle visibility."</div>
-          <button class="btn btn--dark btn--full">Choose Retainer <span class="a">→</span></button>
-        </div>
-      </section>
-
-      <!-- TRANSFORMATIONS -->
-      <section class="sec pad">
-        <span class="tag tag--yellow">● Transformations</span>
-        <h2 class="xform__h2">Before we work together.<br/><span>After three weeks.</span></h2>
-        <div class="ba">
-          <div class="ba__row">
-            <div class="ba__cell ba__cell--before"><div class="img"><img src="https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--before">BEFORE</span></div>
-            <div class="ba__cell"><div class="img"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--after">AFTER</span></div>
-          </div>
-          <div class="ba__meta"><div class="ba__name">T., Fintech Founder</div><div class="ba__metric">+1.9× round demand</div></div>
-        </div>
-        <div class="ba">
-          <div class="ba__row">
-            <div class="ba__cell ba__cell--before"><div class="img"><img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--before">BEFORE</span></div>
-            <div class="ba__cell"><div class="img"><img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--after">AFTER</span></div>
-          </div>
-          <div class="ba__meta"><div class="ba__name">Dr. V., Dermatologist</div><div class="ba__metric">+70% fees</div></div>
-        </div>
-      </section>
-
-      <!-- TESTIMONIALS -->
-      <section class="sec pad">
-        <span class="tag tag--mint">● Voices</span>
-        <h2 class="tst__h2">Loved by founders<br/><span>who ship.</span></h2>
-        <div class="quote">
-          <div class="quote__mark">"</div>
-          <p class="quote__txt">Patients arrive already <mark>convinced. The consultation became easier</mark> — not the sales part, the actual medicine part.</p>
-          <div class="quote__who"><img src="https://i.pravatar.cc/80?img=47" alt=""/><div><div class="quote__name">Dr. V.</div><div class="quote__role">Aesthetic derm, Madrid</div></div></div>
-        </div>
-        <div class="quote">
-          <div class="quote__mark">"</div>
-          <p class="quote__txt">My profile started <mark>doing the outbound I used to do</mark>. Round closed a week early.</p>
-          <div class="quote__who"><img src="https://i.pravatar.cc/80?img=12" alt=""/><div><div class="quote__name">T.</div><div class="quote__role">Fintech founder, seed → Series A</div></div></div>
-        </div>
-      </section>
-
-      <!-- PROCESS -->
-      <section class="sec pad">
-        <span class="tag tag--light">● Process</span>
-        <h2 class="proc__h2">Three steps.<br/><span>One decision.</span></h2>
-        <p class="proc__sub">No strategy decks. Every deliverable tied to a measurable outcome.</p>
-        <div class="step step--yellow">
-          <div class="step__top"><div class="step__n">01</div><div class="step__arr">→</div></div>
-          <div class="step__title">Apply &amp; Audit</div>
-          <p class="step__desc">A 6-minute form, then a 30-min call. We reply within 48h — yes, maybe, or honest no.</p>
-          <div class="img"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80&auto=format&fit=crop" alt=""/></div>
-        </div>
-        <div class="step step--coral">
-          <div class="step__top"><div class="step__n">02</div><div class="step__arr">→</div></div>
-          <div class="step__title">Direct &amp; Shoot</div>
-          <p class="step__desc">Positioning settled before the first frame. 1–2 studio days in Barcelona (or we fly).</p>
-          <div class="img"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80&auto=format&fit=crop" alt=""/></div>
-        </div>
-        <div class="step step--mint">
-          <div class="step__top"><div class="step__n">03</div><div class="step__arr">→</div></div>
-          <div class="step__title">Launch &amp; Track</div>
-          <p class="step__desc">We sit on the rollout. Four baseline questions day 0, same four day 90. Delta is the deliverable.</p>
-          <div class="img"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80&auto=format&fit=crop" alt=""/></div>
-        </div>
-      </section>
-
-      <!-- MEASUREMENT -->
-      <div class="meas-wrap">
-        <section class="meas">
-          <span class="tag tag--dark">● How we measure</span>
-          <h2 class="meas__h2">Four baseline questions.<br/><span>Ninety-day delta.</span></h2>
-          <p class="meas__sub">We don't track vanity metrics. We track whether strangers describe you differently at day 90 than day 0. The delta <em>is</em> the deliverable.</p>
-          <div class="meas__list">
-            <div class="meas__q"><div class="meas__qn">01</div><div class="meas__qt">How do strangers describe you in one sentence?</div></div>
-            <div class="meas__q"><div class="meas__qn">02</div><div class="meas__qt">What is your rate, and how often is it questioned?</div></div>
-            <div class="meas__q"><div class="meas__qn">03</div><div class="meas__qt">How many unasked-for inbound leads per month?</div></div>
-            <div class="meas__q"><div class="meas__qn">04</div><div class="meas__qt">What version of you does your feed show?</div></div>
           </div>
         </section>
-      </div>
 
-      <!-- FOOTER -->
-      <div class="foot-wrap">
-        <footer class="foot">
-          <h3 class="foot__brand">Kravchenko<span>.</span></h3>
-          <p class="foot__tag">Personal-brand &amp; image studio based in Barcelona. Cohort 08 booking for Feb 2026.</p>
-          <button class="btn btn--yellow btn--full">Get your image audit <span class="a">→</span></button>
-          <div class="foot__cols">
-            <div class="foot__col"><h4>STUDIO</h4><a href="#">Home</a><a href="#">Work</a><a href="#">Services</a><a href="#">About</a><a href="#">Apply</a></div>
-            <div class="foot__col"><h4>CONTACT</h4><a href="#">hello@kravchenko.studio</a><a href="#">Barcelona · Lisbon</a><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
+        <div class="trust-pad">
+          <div class="trust">
+            <div class="trust__label">AS SEEN IN</div>
+            <div class="trust__logos">
+              <span class="trust__logo">El País</span>
+              <span class="trust__logo">Monocle</span>
+              <span class="trust__logo">Kinfolk</span>
+              <span class="trust__logo">Forbes</span>
+              <span class="trust__logo">Cereal</span>
+              <span class="trust__logo">Apartamento</span>
+            </div>
           </div>
-          <div class="foot__bot"><div>© 2026 Kravchenko Studio</div><div>F · mobile</div></div>
-        </footer>
+        </div>
+
+        <section class="sec pad">
+          <div class="sec-eyebrow">WE DON'T JUST SHOOT —<br/>WE REPOSITION.</div>
+          <article class="intro-card">
+            <div class="intro-card__top">
+              <img src="./uploads/Founder.jpg" alt="Kirill Korshikov"/>
+              <div class="intro-card__scrim"></div>
+              <div class="intro-card__kicker">
+                <span class="tag tag--yellow">● Founder</span>
+                <span class="tag tag--dark" style="background:rgba(15,16,48,.72); color:#fff">Since '21</span>
+              </div>
+              <div class="intro-card__who">
+                <div>
+                  <div class="intro-card__name">Kirill Korshikov</div>
+                  <div class="intro-card__role">Creative director · Studio founder</div>
+                </div>
+                <div class="intro-card__sig">— KK</div>
+              </div>
+            </div>
+            <div class="intro-card__body">
+              <p class="intro-card__lead">
+                We help founders and experts build an image that matches the level they operate at.
+              </p>
+              <p class="intro-card__lead" style="margin-top:10px">
+                From brand clarity to content direction and production, we build a presence <mark>people trust before the first call</mark>.
+              </p>
+              <div class="intro-card__meta">
+                <div class="intro-card__stat"><b>82+</b><span>Founders scaled</span></div>
+                <div class="intro-card__stat"><b>29</b><span>Shipped cases</span></div>
+                <div class="intro-card__stat"><b>48h</b><span>Reply promise</span></div>
+              </div>
+            </div>
+          </article>
+          <div class="intro-tags">
+            <span class="tag tag--yellow">● Positioning</span>
+            <span class="tag tag--light">Photography</span>
+            <span class="tag tag--light">Content system</span>
+            <span class="tag tag--mint">● Since '21</span>
+          </div>
+        </section>
+
+        <section class="sec pad">
+          <div class="stats">
+            <div class="stat stat--yellow"><div class="stat__top"><div class="stat__label">Founders scaled</div><div class="stat__arr">↗</div></div><div><div class="stat__value">82+</div><div class="stat__note">Since 2021</div></div></div>
+            <div class="stat stat--coral"><div class="stat__top"><div class="stat__label">Audience growth</div><div class="stat__arr">↗</div></div><div><div class="stat__value">3M+</div><div class="stat__note">Aggregate reach</div></div></div>
+            <div class="stat stat--mint"><div class="stat__top"><div class="stat__label">Lead quality</div><div class="stat__arr">↗</div></div><div><div class="stat__value">5×</div><div class="stat__note">Pre vs. post</div></div></div>
+            <div class="stat stat--navy"><div class="stat__top"><div class="stat__label">Press features</div><div class="stat__arr">↗</div></div><div><div class="stat__value">47</div><div class="stat__note">Tier-1 outlets</div></div></div>
+          </div>
+        </section>
+
+        <section class="sec pad">
+          <span class="tag tag--yellow">● 05 Levers of Public Trust</span>
+          <h2 class="eco__h2">Everything your <span>public image</span> needs.</h2>
+          <p class="eco__sub">Not a menu. An ecosystem. Five disciplines that only ship together.</p>
+          <div class="eco__list" id="eco">
+            <div class="eco__row open"><button class="eco__btn"><span class="eco__num">01</span><span class="eco__title">Positioning</span><span class="eco__icon">+</span></button><div class="eco__desc">So people stop guessing what you do and start understanding your value faster.</div></div>
+            <div class="eco__row"><button class="eco__btn"><span class="eco__num">02</span><span class="eco__title">Content direction</span><span class="eco__mr">MOST REQUESTED</span><span class="eco__icon">+</span></button><div class="eco__desc">So your content stops feeling random and starts strengthening your reputation.</div></div>
+            <div class="eco__row"><button class="eco__btn"><span class="eco__num">03</span><span class="eco__title">Brand clarity</span><span class="eco__icon">+</span></button><div class="eco__desc">So every touchpoint feels like the same credible person, not five different versions of you.</div></div>
+            <div class="eco__row"><button class="eco__btn"><span class="eco__num">04</span><span class="eco__title">Visual identity</span><span class="eco__icon">+</span></button><div class="eco__desc">So your image looks more premium, more intentional, and more aligned with your level.</div></div>
+            <div class="eco__row"><button class="eco__btn"><span class="eco__num">05</span><span class="eco__title">Presence strategy</span><span class="eco__icon">+</span></button><div class="eco__desc">So your new positioning shows up in the market instead of staying a good idea.</div></div>
+          </div>
+        </section>
+
+        <div class="results-wrap">
+          <section class="results">
+            <span class="tag tag--dark">● Case studies</span>
+            <h2 class="results__h2">Results that speak<br/>louder than <span>words.</span></h2>
+            <div class="results__grid">
+              <button class="caseCard" data-go="work">
+                <div class="img"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=900&q=80&auto=format&fit=crop" alt=""/></div>
+                <div class="caseCard__scrim"></div>
+                <div class="caseCard__arr">↗</div>
+                <div class="caseCard__tag"><span class="tag tag--dark">Fintech Founder</span></div>
+                <div class="caseCard__bot"><div class="caseCard__delta">0 → 100K followers</div><div class="caseCard__note">Invisible → oversubscribed round</div></div>
+              </button>
+              <button class="caseCard" data-go="work">
+                <div class="img"><img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=900&q=80&auto=format&fit=crop" alt=""/></div>
+                <div class="caseCard__scrim"></div>
+                <div class="caseCard__arr">↗</div>
+                <div class="caseCard__tag"><span class="tag tag--dark">Aesthetic Derm</span></div>
+                <div class="caseCard__bot"><div class="caseCard__delta">3× revenue growth</div><div class="caseCard__note">Cold search → 4-month waitlist</div></div>
+              </button>
+              <button class="caseCard" data-go="work">
+                <div class="img"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80&auto=format&fit=crop" alt=""/></div>
+                <div class="caseCard__scrim"></div>
+                <div class="caseCard__arr">↗</div>
+                <div class="caseCard__tag"><span class="tag tag--dark">Executive Coach</span></div>
+                <div class="caseCard__bot"><div class="caseCard__delta">2 enterprise contracts</div><div class="caseCard__note">Referral-only → inbound leader</div></div>
+              </button>
+            </div>
+            <div class="results__cta"><button class="btn btn--yellow btn--full" data-go="work">View all 29 cases <span class="a">→</span></button></div>
+          </section>
+        </div>
+
+        <section class="sec pad">
+          <span class="tag tag--yellow">● Services</span>
+          <h2 class="svc__h2">Three ways in.<br/><span>You, obvious.</span></h2>
+          <div class="tier tier--soft">
+            <div class="tier__tag">01 · ENTRY</div>
+            <div><div class="tier__name">Opening</div><div class="tier__price">€6 500</div></div>
+            <div class="tier__rule"></div>
+            <ul class="tier__list">
+              <li><span class="tick">✓</span>90-min positioning session</li>
+              <li><span class="tick">✓</span>Half-day studio shoot — 30 finals</li>
+              <li><span class="tick">✓</span>Brand voice one-pager</li>
+            </ul>
+            <div class="tier__outcome">"One clear message. One consistent face."</div>
+            <button class="btn btn--dark btn--full" data-go="apply" data-tier="Opening">Choose Opening <span class="a">→</span></button>
+          </div>
+          <div class="tier tier--navy">
+            <div class="tier__badge">Most chosen</div>
+            <div class="tier__tag">02 · FLAGSHIP</div>
+            <div><div class="tier__name">Signature</div><div class="tier__price">€18 000</div></div>
+            <div class="tier__rule"></div>
+            <ul class="tier__list">
+              <li><span class="tick">✓</span>2-day positioning intensive</li>
+              <li><span class="tick">✓</span>Full production day — team of 5</li>
+              <li><span class="tick">✓</span>120+ finals across 4 settings</li>
+              <li><span class="tick">✓</span>12-week content rollout plan</li>
+            </ul>
+            <div class="tier__outcome">"A personal brand that books meetings while you sleep."</div>
+            <button class="btn btn--yellow btn--full" data-go="apply" data-tier="Signature">Choose Signature <span class="a">→</span></button>
+          </div>
+          <div class="tier tier--yellow">
+            <div class="tier__tag">03 · ONGOING</div>
+            <div><div class="tier__name">Retainer</div><div class="tier__price">€4 800/mo</div></div>
+            <div class="tier__rule"></div>
+            <ul class="tier__list">
+              <li><span class="tick">✓</span>Monthly shoot day</li>
+              <li><span class="tick">✓</span>Content strategy &amp; review</li>
+              <li><span class="tick">✓</span>Press &amp; podcast pitching</li>
+            </ul>
+            <div class="tier__outcome">"You show up. We handle visibility."</div>
+            <button class="btn btn--dark btn--full" data-go="apply" data-tier="Retainer">Choose Retainer <span class="a">→</span></button>
+          </div>
+        </section>
+
+        <section class="sec pad">
+          <span class="tag tag--yellow">● Transformations</span>
+          <h2 class="xform__h2">Before we work together.<br/><span>After three weeks.</span></h2>
+          <div class="ba">
+            <div class="ba__row">
+              <div class="ba__cell ba__cell--before"><div class="img"><img src="https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--before">BEFORE</span></div>
+              <div class="ba__cell"><div class="img"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--after">AFTER</span></div>
+            </div>
+            <div class="ba__meta"><div class="ba__name">T., Fintech Founder</div><div class="ba__metric">+1.9× round demand</div></div>
+          </div>
+          <div class="ba">
+            <div class="ba__row">
+              <div class="ba__cell ba__cell--before"><div class="img"><img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--before">BEFORE</span></div>
+              <div class="ba__cell"><div class="img"><img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=700&q=80&auto=format&fit=crop" alt=""/></div><span class="ba__lbl ba__lbl--after">AFTER</span></div>
+            </div>
+            <div class="ba__meta"><div class="ba__name">Dr. V., Dermatologist</div><div class="ba__metric">+70% fees</div></div>
+          </div>
+        </section>
+
+        <section class="sec pad">
+          <span class="tag tag--mint">● Voices</span>
+          <h2 class="tst__h2">Loved by founders<br/><span>who ship.</span></h2>
+          <div class="quote">
+            <div class="quote__mark">"</div>
+            <p class="quote__txt">Patients arrive already <mark>convinced. The consultation became easier</mark> — not the sales part, the actual medicine part.</p>
+            <div class="quote__who"><img src="https://i.pravatar.cc/80?img=47" alt=""/><div><div class="quote__name">Dr. V.</div><div class="quote__role">Aesthetic derm, Madrid</div></div></div>
+          </div>
+          <div class="quote">
+            <div class="quote__mark">"</div>
+            <p class="quote__txt">My profile started <mark>doing the outbound I used to do</mark>. Round closed a week early.</p>
+            <div class="quote__who"><img src="https://i.pravatar.cc/80?img=12" alt=""/><div><div class="quote__name">T.</div><div class="quote__role">Fintech founder, seed → Series A</div></div></div>
+          </div>
+        </section>
+
+        <section class="sec pad">
+          <span class="tag tag--light">● Process</span>
+          <h2 class="proc__h2">Three steps.<br/><span>One decision.</span></h2>
+          <p class="proc__sub">No strategy decks. Every deliverable tied to a measurable outcome.</p>
+          <div class="step step--yellow">
+            <div class="step__top"><div class="step__n">01</div><div class="step__arr">→</div></div>
+            <div class="step__title">Apply &amp; Audit</div>
+            <p class="step__desc">A 6-minute form, then a 30-min call. We reply within 48h — yes, maybe, or honest no.</p>
+            <div class="img"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80&auto=format&fit=crop" alt=""/></div>
+          </div>
+          <div class="step step--coral">
+            <div class="step__top"><div class="step__n">02</div><div class="step__arr">→</div></div>
+            <div class="step__title">Direct &amp; Shoot</div>
+            <p class="step__desc">Positioning settled before the first frame. 1–2 studio days in Barcelona (or we fly).</p>
+            <div class="img"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80&auto=format&fit=crop" alt=""/></div>
+          </div>
+          <div class="step step--mint">
+            <div class="step__top"><div class="step__n">03</div><div class="step__arr">→</div></div>
+            <div class="step__title">Launch &amp; Track</div>
+            <p class="step__desc">We sit on the rollout. Four baseline questions day 0, same four day 90.</p>
+            <div class="img"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80&auto=format&fit=crop" alt=""/></div>
+          </div>
+        </section>
+
+        <div class="meas-wrap">
+          <section class="meas">
+            <span class="tag tag--dark">● How we measure</span>
+            <h2 class="meas__h2">Four baseline questions.<br/><span>Ninety-day delta.</span></h2>
+            <p class="meas__sub">We track whether strangers describe you differently at day 90 than day 0. The delta <em>is</em> the deliverable.</p>
+            <div class="meas__list">
+              <div class="meas__q"><div class="meas__qn">01</div><div class="meas__qt">How do strangers describe you in one sentence?</div></div>
+              <div class="meas__q"><div class="meas__qn">02</div><div class="meas__qt">What is your rate, and how often is it questioned?</div></div>
+              <div class="meas__q"><div class="meas__qn">03</div><div class="meas__qt">How many unasked-for inbound leads per month?</div></div>
+              <div class="meas__q"><div class="meas__qn">04</div><div class="meas__qt">What version of you does your feed show?</div></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="foot-wrap">
+          <footer class="foot">
+            <h3 class="foot__brand">Kravchenko<span>.</span></h3>
+            <p class="foot__tag">Personal-brand &amp; image studio based in Barcelona. Cohort 08 booking for Feb 2026.</p>
+            <button class="btn btn--yellow btn--full" data-go="apply">Get your image audit <span class="a">→</span></button>
+            <div class="foot__cols">
+              <div class="foot__col"><h4>STUDIO</h4>
+                <button data-go="home">Home</button>
+                <button data-go="work">Work</button>
+                <button data-go="services">Services</button>
+                <button data-go="about">About</button>
+                <button data-go="apply">Apply</button>
+              </div>
+              <div class="foot__col"><h4>CONTACT</h4>
+                <button>hello@kravchenko.studio</button>
+                <button>Barcelona · Lisbon</button>
+                <button>Instagram</button>
+                <button>LinkedIn</button>
+              </div>
+            </div>
+            <div class="foot__bot"><div>© 2026 Kravchenko Studio</div><div>F · mobile</div></div>
+          </footer>
+        </div>
+
+        <div class="stickyCTA">
+          <div class="stickyCTA__inner">
+            <div class="stickyCTA__meta"><strong>4 client slots / month</strong>Cohort 08 · Feb 2026</div>
+            <button class="btn btn--yellow" data-go="apply">Apply <span class="a">→</span></button>
+          </div>
+        </div>
       </div>
 
-      <!-- STICKY BOTTOM CTA -->
-      <div class="stickyCTA">
-        <div class="stickyCTA__inner">
-          <div class="stickyCTA__meta"><strong>4 client slots / month</strong>Cohort 08 · Feb 2026</div>
-          <button class="btn btn--yellow">Apply <span class="a">→</span></button>
+      <!-- ============ WORK ============ -->
+      <div class="screen" id="page-work">
+        <section class="work-hero" style="margin-top:10px">
+          <span class="tag tag--yellow">● 29 cases · 2021–2026</span>
+          <h1>The work,<br/><span>by the numbers.</span></h1>
+          <p>Every engagement tracked against four baseline questions. Filter by who you are below.</p>
+        </section>
+
+        <div class="work-filter" id="workFilter">
+          <button class="filter-chip active" data-filter="all">All work</button>
+          <button class="filter-chip" data-filter="founder">Founders</button>
+          <button class="filter-chip" data-filter="doctor">Doctors</button>
+          <button class="filter-chip" data-filter="coach">Coaches</button>
+          <button class="filter-chip" data-filter="performer">Performers</button>
+        </div>
+
+        <div class="work-grid" id="workGrid">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="stickyCTA">
+          <div class="stickyCTA__inner">
+            <div class="stickyCTA__meta"><strong>Like what you see?</strong>6-minute audit</div>
+            <button class="btn btn--yellow" data-go="apply">Apply <span class="a">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SERVICES ============ -->
+      <div class="screen" id="page-services">
+        <section class="services-hero" style="margin-top:10px">
+          <span class="tag tag--dark">● Four doors in</span>
+          <h1>Four ways to work<br/>with <span>the studio.</span></h1>
+          <p>Every engagement begins with the same audit. Prices below are final. No contact-for-quote.</p>
+        </section>
+
+        <section class="sec pad">
+          <div class="tier tier--soft">
+            <div class="tier__tag">I · ENTRY</div>
+            <div><div class="tier__name">The Opening</div><div class="tier__price">€6 500</div></div>
+            <div class="tier__rule"></div>
+            <ul class="tier__list">
+              <li><span class="tick">✓</span>Positioning audit · 90 min</li>
+              <li><span class="tick">✓</span>3 directed short films</li>
+              <li><span class="tick">✓</span>12 editorial stills</li>
+              <li><span class="tick">✓</span>14-day release plan</li>
+            </ul>
+            <div class="tier__outcome">Entry to the studio. A directed day that produces a coherent public signature in two weeks.</div>
+            <button class="btn btn--dark btn--full" data-go="apply" data-tier="Opening">Start with the Opening <span class="a">→</span></button>
+          </div>
+          <div class="tier tier--navy">
+            <div class="tier__badge">Most chosen</div>
+            <div class="tier__tag">II · FLAGSHIP</div>
+            <div><div class="tier__name">The Signature</div><div class="tier__price">€18 000</div></div>
+            <div class="tier__rule"></div>
+            <ul class="tier__list">
+              <li><span class="tick">✓</span>Positioning intensive</li>
+              <li><span class="tick">✓</span>Visual system · type, colour, grid</li>
+              <li><span class="tick">✓</span>Two directed studio days</li>
+              <li><span class="tick">✓</span>90-day launch plan</li>
+            </ul>
+            <div class="tier__outcome">The full personal-brand build. Positioning, visual system, two studio days, 90-day architecture.</div>
+            <button class="btn btn--yellow btn--full" data-go="apply" data-tier="Signature">Apply for the Signature <span class="a">→</span></button>
+          </div>
+          <div class="tier tier--yellow">
+            <div class="tier__tag">III · STRATEGY</div>
+            <div><div class="tier__name">The Positioning</div><div class="tier__price">€4 200</div></div>
+            <div class="tier__rule"></div>
+            <ul class="tier__list">
+              <li><span class="tick">✓</span>Async diagnostic</li>
+              <li><span class="tick">✓</span>Positioning document</li>
+              <li><span class="tick">✓</span>Content audit</li>
+              <li><span class="tick">✓</span>One 60-min direction call</li>
+            </ul>
+            <div class="tier__outcome">Pure strategy sprint when you already have production. Category, promise, language. No shoot.</div>
+            <button class="btn btn--dark btn--full" data-go="apply" data-tier="Positioning">Book the Intensive <span class="a">→</span></button>
+          </div>
+          <div class="tier tier--soft">
+            <div class="tier__tag">IV · ONGOING</div>
+            <div><div class="tier__name">The Retainer</div><div class="tier__price">€4 800/mo</div></div>
+            <div class="tier__rule"></div>
+            <ul class="tier__list">
+              <li><span class="tick">✓</span>Monthly direction call</li>
+              <li><span class="tick">✓</span>Monthly content day</li>
+              <li><span class="tick">✓</span>Quarterly re-audit</li>
+              <li><span class="tick">✓</span>Priority creative response</li>
+            </ul>
+            <div class="tier__outcome">We run your brand the way a label runs an artist. Monthly direction, monthly shoots, quarterly re-audits.</div>
+            <button class="btn btn--dark btn--full" data-go="apply" data-tier="Retainer">Enquire about Retainer <span class="a">→</span></button>
+          </div>
+        </section>
+
+        <div class="stickyCTA">
+          <div class="stickyCTA__inner">
+            <div class="stickyCTA__meta"><strong>Not sure which?</strong>6 min audit decides</div>
+            <button class="btn btn--yellow" data-go="apply">Apply <span class="a">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ ABOUT ============ -->
+      <div class="screen" id="page-about">
+        <section class="about-hero" style="margin-top:10px">
+          <span class="tag tag--yellow">● The studio</span>
+          <h1>A small studio<br/>for people whose<br/><span>image has to carry weight.</span></h1>
+          <p>Six people, based between Barcelona and Lisbon. We direct personal brand and image work for founders, doctors, consultants, coaches, performers and creators — whose authority in the room is already there.</p>
+        </section>
+
+        <div class="about-quote">
+          <h2>"Most of our clients don't need more output. They need <mark>fewer, sharper decisions</mark> about what they put into the world — and someone to defend those decisions once made."</h2>
+          <div class="who">
+            <img src="./uploads/Founder.jpg" alt="Kirill Korshikov"/>
+            <div><div class="name">Kirill Korshikov</div><div class="role">Founder · Creative director</div></div>
+          </div>
+        </div>
+
+        <div class="principles">
+          <h3>Six things we <span>don't negotiate.</span></h3>
+          <div class="principle"><div class="principle__n">PRINCIPLE 01</div><div class="principle__t">Positioning before production</div><p class="principle__d">No frame shot before we agree what it says. If we can't say it in a sentence, the shoot won't rescue it.</p></div>
+          <div class="principle"><div class="principle__n">PRINCIPLE 02</div><div class="principle__t">Fewer, sharper assets</div><p class="principle__d">Thirty mediocre pieces make you invisible. Four sharp ones make you legible.</p></div>
+          <div class="principle"><div class="principle__n">PRINCIPLE 03</div><div class="principle__t">Taste is not optional</div><p class="principle__d">Every reference, frame and caption is a decision. We don't outsource decisions.</p></div>
+          <div class="principle"><div class="principle__n">PRINCIPLE 04</div><div class="principle__t">The audit tells the truth</div><p class="principle__d">If the audit says you're not ready, we say so. We've turned down more than we've taken.</p></div>
+          <div class="principle"><div class="principle__n">PRINCIPLE 05</div><div class="principle__t">Deliverables are a side effect</div><p class="principle__d">You're hiring a direction. The files are the evidence.</p></div>
+          <div class="principle"><div class="principle__n">PRINCIPLE 06</div><div class="principle__t">Time is the rarest material</div><p class="principle__d">Ninety days, two studio days, six anchor pieces. Scope is a feature.</p></div>
+        </div>
+
+        <div class="stickyCTA">
+          <div class="stickyCTA__inner">
+            <div class="stickyCTA__meta"><strong>Ready to talk?</strong>Cohort 08 · Feb 2026</div>
+            <button class="btn btn--yellow" data-go="apply">Apply <span class="a">→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ APPLY ============ -->
+      <div class="screen" id="page-apply">
+        <section class="apply-hero" style="margin-top:10px">
+          <span class="tag tag--dark">● Studio audit · 6 min</span>
+          <h1 class="apply-hero__h1" id="applyH1">Six minutes.<br/><span>Then we talk.</span></h1>
+          <div class="apply-hero__meta">
+            <div class="opa" id="applyStepLabel">STEP 01 / 06</div>
+            <div class="apply-hero__step" id="applyStepName">WHO</div>
+          </div>
+          <div class="progress"><div id="applyProgress" style="width:16%"></div></div>
+        </section>
+
+        <div class="apply-card" id="applyCard">
+          <!-- rendered by JS -->
+        </div>
+
+        <div class="apply-actions" id="applyActions">
+          <button class="btn btn--back" id="applyBack" style="display:none">← Back</button>
+          <button class="btn btn--yellow" id="applyNext" disabled>Continue <span class="a">→</span></button>
+        </div>
+
+        <div style="height:40px"></div>
+      </div>
+
+      <!-- ============ SENT ============ -->
+      <div class="screen" id="page-sent">
+        <div class="sent-wrap">
+          <div class="sent-check">✓</div>
+          <h2 class="sent-h2">Application <span>received.</span></h2>
+          <p class="sent-sub">We'll review within 48 hours and reply personally — yes, maybe, or an honest no. Check your inbox for confirmation.</p>
+          <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; justify-content:center">
+            <button class="btn btn--dark" data-go="home">Back to home <span class="a">→</span></button>
+            <button class="btn btn--ghost" data-go="work">See the work <span class="a">→</span></button>
+          </div>
+          <div style="margin-top:32px; padding:18px 20px; background:var(--bgSoft); border-radius:16px; max-width:300px">
+            <div style="font-size:10px; letter-spacing:.14em; color:var(--indigo); font-weight:700; margin-bottom:8px">WHAT HAPPENS NEXT</div>
+            <div style="font-size:13px; line-height:1.55; color:var(--navy); text-align:left">
+              <div style="display:flex; gap:10px; margin-bottom:8px"><span style="color:var(--indigo); font-weight:700">01.</span> We read it personally — no form bots.</div>
+              <div style="display:flex; gap:10px; margin-bottom:8px"><span style="color:var(--indigo); font-weight:700">02.</span> 48h reply with next step or honest no.</div>
+              <div style="display:flex; gap:10px"><span style="color:var(--indigo); font-weight:700">03.</span> 30-min direction call if it's a fit.</div>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
+
+    <!-- Drawer overlay -->
+    <div class="drawer-scrim" id="scrim"></div>
+    <aside class="drawer" id="drawer">
+      <button class="drawer__close" id="drawerClose" aria-label="Close">×</button>
+      <div class="drawer__eyebrow">● KRAVCHENKO STUDIO</div>
+      <div class="drawer__links">
+        <button class="drawer__link" data-go="home">Home <span class="arr">→</span></button>
+        <button class="drawer__link" data-go="work">Work <span class="arr">→</span></button>
+        <button class="drawer__link" data-go="services">Services <span class="arr">→</span></button>
+        <button class="drawer__link" data-go="about">About <span class="arr">→</span></button>
+        <button class="drawer__link" data-go="apply">Apply <span class="arr">→</span></button>
+      </div>
+      <div class="drawer__foot">
+        <p>Personal-brand &amp; image studio. Cohort 08 booking for Feb 2026.</p>
+        <div class="drawer__contact"><strong>EMAIL</strong>hello@kravchenko.studio</div>
+        <div class="drawer__contact"><strong>STUDIO</strong>Barcelona · Lisbon</div>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast">Copied</div>
+    <div class="home-ind"></div>
   </div>
 
   <div class="caption" style="max-width:420px; text-align:center">
-    402 × 874 · iPhone 2026 · Dynamic Island · sticky pill-nav · sticky conversion bar · Poppins 800
+    402 × 874 · iPhone 2026 · Working routing · Multi-step apply funnel · Drawer menu
   </div>
 </div>
 
 <script>
-  function toggleEco(btn){
-    var row = btn.parentElement;
-    var open = row.classList.contains('open');
-    document.querySelectorAll('.eco__row').forEach(function(r){
-      r.classList.remove('open');
-      var i = r.querySelector('.eco__icon'); if(i) i.textContent='+';
+  // -----------------------------------------
+  // Router
+  // -----------------------------------------
+  const screens = ['home','work','services','about','apply','sent'];
+  let currentPage = 'home';
+  const scr = document.getElementById('scr');
+
+  function go(page, opts = {}){
+    if(!screens.includes(page)) page = 'home';
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('page-' + page);
+    if(el) el.classList.add('active');
+    currentPage = page;
+    scr.scrollTop = 0;
+    // close drawer if open
+    setDrawer(false);
+    // sync drawer active state
+    document.querySelectorAll('.drawer__link').forEach(l => {
+      l.classList.toggle('active', l.dataset.go === page);
     });
-    if(!open){
-      row.classList.add('open');
-      var i = row.querySelector('.eco__icon'); if(i) i.textContent='–';
+    // hooks
+    if(page === 'apply'){
+      if(opts.tier) state.tier = opts.tier;
+      renderApply();
     }
+    if(page === 'work') renderWork();
   }
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go]');
+    if(t){
+      e.preventDefault();
+      const tier = t.dataset.tier;
+      go(t.dataset.go, tier ? {tier} : {});
+    }
+  });
+
+  // -----------------------------------------
+  // Drawer
+  // -----------------------------------------
+  const drawer = document.getElementById('drawer');
+  const scrim = document.getElementById('scrim');
+  function setDrawer(open){
+    drawer.classList.toggle('open', open);
+    scrim.classList.toggle('open', open);
+  }
+  document.getElementById('burger').addEventListener('click', () => setDrawer(true));
+  document.getElementById('drawerClose').addEventListener('click', () => setDrawer(false));
+  scrim.addEventListener('click', () => setDrawer(false));
+
+  // -----------------------------------------
+  // Eco accordion
+  // -----------------------------------------
+  document.getElementById('eco').addEventListener('click', e => {
+    const btn = e.target.closest('.eco__btn');
+    if(!btn) return;
+    const row = btn.parentElement;
+    const wasOpen = row.classList.contains('open');
+    document.querySelectorAll('#eco .eco__row').forEach(r => r.classList.remove('open'));
+    if(!wasOpen) row.classList.add('open');
+  });
+
+  // -----------------------------------------
+  // Work filter + grid
+  // -----------------------------------------
+  const cases = [
+    { n:'014', who:'Dr. V. — Derm · Madrid',     cat:'doctor',    t:'Cold search → 4-month waitlist', delta:'+3× monthly revenue', img:'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=900&q=80&auto=format&fit=crop' },
+    { n:'019', who:'T. — Fintech founder',       cat:'founder',   t:'Invisible → oversubscribed round', delta:'0 → 100K followers', img:'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=900&q=80&auto=format&fit=crop' },
+    { n:'021', who:'M. — Exec coach, ex-McK',    cat:'coach',     t:'Referral-only → inbound leader', delta:'2 enterprise contracts', img:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80&auto=format&fit=crop' },
+    { n:'023', who:'S. — Concert performer',     cat:'performer', t:'DM bookings → festival invites', delta:'Fee ×2.3', img:'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=900&q=80&auto=format&fit=crop' },
+    { n:'025', who:'Dr. L. — Cardiologist',      cat:'doctor',    t:'Hospital-only → private practice', delta:'12 private clients/mo', img:'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=900&q=80&auto=format&fit=crop' },
+    { n:'027', who:'R. — SaaS founder',          cat:'founder',   t:'Quiet seed → podcast circuit', delta:'14 inbound investors', img:'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=900&q=80&auto=format&fit=crop' },
+    { n:'028', who:'N. — Leadership coach',      cat:'coach',     t:'Bootstrapped → waitlisted',     delta:'Fee ×1.8', img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=900&q=80&auto=format&fit=crop' },
+    { n:'029', who:'Kh. — Contemporary dancer',  cat:'performer', t:'Freelance → named in festivals', delta:'+4 editorial features', img:'https://images.unsplash.com/photo-1535525153412-5a42439a210d?w=900&q=80&auto=format&fit=crop' },
+  ];
+
+  let activeFilter = 'all';
+  function renderWork(){
+    const grid = document.getElementById('workGrid');
+    const shown = cases.filter(c => activeFilter==='all' || c.cat===activeFilter);
+    grid.innerHTML = shown.map(c => `
+      <button class="work-card" data-go="apply">
+        <div class="img"><img src="${c.img}" alt=""/></div>
+        <div class="work-card__body">
+          <div class="work-card__who">Case · ${c.n} · ${c.who}</div>
+          <div class="work-card__t">${c.t}</div>
+          <div class="work-card__delta">${c.delta}</div>
+        </div>
+      </button>
+    `).join('');
+  }
+  document.getElementById('workFilter').addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip');
+    if(!chip) return;
+    activeFilter = chip.dataset.filter;
+    document.querySelectorAll('#workFilter .filter-chip').forEach(c => c.classList.toggle('active', c===chip));
+    renderWork();
+  });
+
+  // -----------------------------------------
+  // Apply funnel
+  // -----------------------------------------
+  const steps = [
+    { key:'who',     name:'WHO',      label:'Who are you, plainly.',        sub:'Name, role, one sentence about what you do.' },
+    { key:'work',    name:'WORK',     label:'Where can we see your work?',  sub:'Any two: Instagram, website, LinkedIn, press.' },
+    { key:'gap',     name:'GAP',      label:'What\'s the gap?',             sub:'How do strangers describe you vs. how you\'d want them to?' },
+    { key:'goals',   name:'GOALS',    label:'What needs to change in 90 days?', sub:'Pick one. We\'ll tell you if it\'s realistic.' },
+    { key:'tier',    name:'TIER',     label:'Which door fits right now?',   sub:'We\'ll confirm on the call. You can change your mind.' },
+    { key:'contact', name:'CONTACT',  label:'Where do we send the reply?',  sub:'Email required. Phone optional (we do call for Signature/Retainer).' },
+  ];
+  const state = {
+    step:0,
+    name:'', role:'', what:'',
+    ig:'', website:'',
+    gapOut:'', gapIn:'',
+    goal:'',
+    tier:'',
+    email:'', phone:''
+  };
+
+  const goals = [
+    ['01','Book 10 inbound calls/mo'],
+    ['02','Close a funding round'],
+    ['03','Launch a new service tier'],
+    ['04','Get on podcast / press'],
+    ['05','Fill a waitlist'],
+    ['06','Charge 2× my current rate']
+  ];
+  const tierOpts = [
+    {name:'Opening',     price:'€6 500',     desc:'Entry · 2 weeks · half-day shoot'},
+    {name:'Signature',   price:'€18 000',    desc:'Flagship · 6 weeks · two studio days'},
+    {name:'Positioning', price:'€4 200',     desc:'Strategy only · no shoot'},
+    {name:'Retainer',    price:'€4 800/mo',  desc:'Ongoing · monthly direction + shoot'},
+    {name:'Not sure',    price:'',           desc:'We\'ll match you on the call.'},
+  ];
+
+  function renderApply(){
+    const s = state.step;
+    const step = steps[s];
+    document.getElementById('applyStepLabel').textContent = `STEP ${String(s+1).padStart(2,'0')} / ${String(steps.length).padStart(2,'0')}`;
+    document.getElementById('applyStepName').textContent = step.name;
+    document.getElementById('applyProgress').style.width = (((s+1)/steps.length)*100) + '%';
+    const back = document.getElementById('applyBack');
+    back.style.display = s===0 ? 'none' : '';
+    const next = document.getElementById('applyNext');
+    next.innerHTML = (s===steps.length-1)
+      ? 'Send application <span class="a">→</span>'
+      : 'Continue <span class="a">→</span>';
+
+    const card = document.getElementById('applyCard');
+    if(step.key === 'who'){
+      card.innerHTML = `
+        <h3>${step.label}</h3>
+        <p class="sub">${step.sub}</p>
+        <div class="field"><label>Full name</label><input id="f-name" type="text" placeholder="Maria López" value="${esc(state.name)}"/></div>
+        <div class="field"><label>Role</label><input id="f-role" type="text" placeholder="Founder, dermatologist, coach…" value="${esc(state.role)}"/></div>
+        <div class="field"><label>What you do, in one sentence</label><textarea id="f-what" placeholder="I help early-stage B2B SaaS teams hit product-market fit…">${esc(state.what)}</textarea></div>
+      `;
+      bindInput('f-name', v => state.name=v);
+      bindInput('f-role', v => state.role=v);
+      bindInput('f-what', v => state.what=v);
+    }
+    else if(step.key === 'work'){
+      card.innerHTML = `
+        <h3>${step.label}</h3>
+        <p class="sub">${step.sub}</p>
+        <div class="field"><label>Instagram handle</label><input id="f-ig" type="text" placeholder="@yourhandle" value="${esc(state.ig)}"/></div>
+        <div class="field"><label>Website / portfolio</label><input id="f-web" type="url" placeholder="https://…" value="${esc(state.website)}"/></div>
+      `;
+      bindInput('f-ig', v => state.ig=v);
+      bindInput('f-web', v => state.website=v);
+    }
+    else if(step.key === 'gap'){
+      card.innerHTML = `
+        <h3>${step.label}</h3>
+        <p class="sub">${step.sub}</p>
+        <div class="field"><label>How strangers describe you today</label><textarea id="f-gout" placeholder="'Some kind of coach, I think?'">${esc(state.gapOut)}</textarea></div>
+        <div class="field"><label>How you'd want them to</label><textarea id="f-gin" placeholder="'The exec coach McKinsey alumni recommend.'">${esc(state.gapIn)}</textarea></div>
+      `;
+      bindInput('f-gout', v => state.gapOut=v);
+      bindInput('f-gin', v => state.gapIn=v);
+    }
+    else if(step.key === 'goals'){
+      card.innerHTML = `
+        <h3>${step.label}</h3>
+        <p class="sub">${step.sub}</p>
+        <div class="chips" id="goalChips">
+          ${goals.map(([n,g]) => `<button class="chip ${state.goal===g?'active':''}" data-goal="${g}"><span class="num">${n}</span>${g}</button>`).join('')}
+        </div>
+      `;
+      card.querySelector('#goalChips').addEventListener('click', e => {
+        const c = e.target.closest('.chip');
+        if(!c) return;
+        state.goal = c.dataset.goal;
+        renderApply();
+      });
+    }
+    else if(step.key === 'tier'){
+      card.innerHTML = `
+        <h3>${step.label}</h3>
+        <p class="sub">${step.sub}</p>
+        <div class="tier-pick" id="tierPick">
+          ${tierOpts.map(t => `
+            <button class="tier-option ${state.tier===t.name?'active':''}" data-tier="${t.name}">
+              <div>
+                <div class="tier-option__name">${t.name}</div>
+                ${t.price ? `<div class="tier-option__price">${t.price}</div>` : ''}
+                <div class="tier-option__desc">${t.desc}</div>
+              </div>
+              <span class="tier-option__check"></span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+      card.querySelector('#tierPick').addEventListener('click', e => {
+        const b = e.target.closest('.tier-option');
+        if(!b) return;
+        state.tier = b.dataset.tier;
+        renderApply();
+      });
+    }
+    else if(step.key === 'contact'){
+      card.innerHTML = `
+        <h3>${step.label}</h3>
+        <p class="sub">${step.sub}</p>
+        <div class="field"><label>Email *</label><input id="f-email" type="email" placeholder="you@domain.com" value="${esc(state.email)}"/></div>
+        <div class="field"><label>Phone (optional)</label><input id="f-phone" type="tel" placeholder="+34 6…" value="${esc(state.phone)}"/></div>
+        <div style="padding:12px 14px; background:var(--bg); border-radius:12px; font-size:11.5px; line-height:1.5; color:rgba(15,16,48,.65)">
+          <strong style="color:var(--indigo); letter-spacing:.1em">PRIVACY</strong><br/>
+          We never share applications. Stored encrypted. Delete on request.
+        </div>
+      `;
+      bindInput('f-email', v => state.email=v);
+      bindInput('f-phone', v => state.phone=v);
+    }
+    updateNextButton();
+  }
+
+  function esc(s){ return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function bindInput(id, fn){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', e => { fn(e.target.value); updateNextButton(); });
+  }
+
+  function canAdvance(){
+    const key = steps[state.step].key;
+    if(key==='who')    return state.name.trim() && state.role.trim() && state.what.trim().length >= 10;
+    if(key==='work')   return (state.ig.trim() || state.website.trim());
+    if(key==='gap')    return state.gapOut.trim().length >= 5 && state.gapIn.trim().length >= 5;
+    if(key==='goals')  return !!state.goal;
+    if(key==='tier')   return !!state.tier;
+    if(key==='contact')return /\S+@\S+\.\S+/.test(state.email);
+    return true;
+  }
+  function updateNextButton(){
+    document.getElementById('applyNext').disabled = !canAdvance();
+  }
+
+  document.getElementById('applyBack').addEventListener('click', () => {
+    if(state.step > 0){ state.step--; renderApply(); scr.scrollTop = 0; }
+  });
+  document.getElementById('applyNext').addEventListener('click', () => {
+    if(!canAdvance()) return;
+    if(state.step < steps.length-1){
+      state.step++; renderApply(); scr.scrollTop = 0;
+    } else {
+      // submit
+      go('sent');
+      // reset for next time
+      setTimeout(() => { state.step = 0; }, 600);
+    }
+  });
+
+  // -----------------------------------------
+  // Initial render
+  // -----------------------------------------
+  renderWork();
+  renderApply();
 </script>
 </body>
 </html>
