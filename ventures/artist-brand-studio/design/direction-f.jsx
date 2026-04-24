@@ -689,7 +689,7 @@ function FEcosystem({ onNav }) {
 function FEcoList() {
   const items = [
     ["01","Positioning","So people stop guessing what you do and start understanding your value faster."],
-    ["02","Content direction","So your content stops feeling random and starts strengthening your reputation."],
+    ["02","Content direction","So your content stops feeling random and starts strengthening your reputation.", true],
     ["03","Brand clarity","So every touchpoint feels like the same credible person, not five different versions of you."],
     ["04","Visual identity","So your image looks more premium, more intentional, and more aligned with your level."],
     ["05","Presence strategy","So your new positioning shows up in the market instead of staying a good idea."],
@@ -697,14 +697,14 @@ function FEcoList() {
   return (
     <div style={{background:F.white, borderRadius:28, padding:18,
                  boxShadow:"0 12px 40px rgba(15,16,48,0.08)"}}>
-      {items.map(([n,t,d], i) => (
-        <FEcoRow key={n} n={n} t={t} d={d} openDefault={i===1} last={i===items.length-1}/>
+      {items.map(([n,t,d,highlighted], i) => (
+        <FEcoRow key={n} n={n} t={t} d={d} highlighted={!!highlighted} openDefault={i===0} last={i===items.length-1}/>
       ))}
     </div>
   );
 }
 
-function FEcoRow({ n, t, d, openDefault, last }) {
+function FEcoRow({ n, t, d, highlighted, openDefault, last }) {
   const [open, setOpen] = React.useState(!!openDefault);
   return (
     <div style={{borderBottom: last ? "none" : "1px solid rgba(15,16,48,0.08)", padding:"4px 0"}}>
@@ -715,7 +715,7 @@ function FEcoRow({ n, t, d, openDefault, last }) {
                 cursor:"pointer", fontFamily:"inherit", textAlign:"left"}}>
         <span style={{fontSize:12, opacity:0.65, width:28, fontWeight:600}}>{n}</span>
         <span style={{flex:1, fontSize:20, fontWeight:700, letterSpacing:"-0.01em"}}>{t}</span>
-        {open && <span style={{background:F.yellow, color:F.navy, padding:"4px 10px",
+        {highlighted && <span style={{background:F.yellow, color:F.navy, padding:"4px 10px",
                                borderRadius:999, fontSize:11, fontWeight:700, letterSpacing:"0.06em"}}>MOST REQUESTED</span>}
         <span style={{width:30, height:30, borderRadius:999,
                       background: open ? F.yellow : "transparent",
