@@ -888,22 +888,22 @@ function FWork({ onNav }) {
 
 function FServicesPage({ onNav }) {
   const tiers = [
-    { n:"I", name:"The Opening", price:"€480", unit:"one studio day",
+    { n:"I", name:"The Opening", price:"€6 500", unit:"one studio day",
       bg:F.white, fg:F.navy, accent:F.indigo,
       lede:"Entry to the studio. A directed day that produces a coherent public signature in two weeks.",
       bullets:["Positioning audit · 90 min","3 directed short films","12 editorial stills","14-day release plan"],
       cta:"Start with the Opening" },
-    { n:"II", name:"The Signature", price:"€2,400", unit:"six weeks",
+    { n:"II", name:"The Signature", price:"€18 000", unit:"six weeks",
       bg:F.navy, fg:F.white, accent:F.yellow, badge:"MOST CHOSEN",
       lede:"The full personal-brand build. Positioning, visual system, two studio days, 90-day architecture.",
       bullets:["Positioning intensive","Visual system · type, colour, grid","Two directed studio days","90-day launch plan"],
       cta:"Apply for the Signature" },
-    { n:"III", name:"The Positioning", price:"€1,200", unit:"strategy only",
+    { n:"III", name:"The Positioning", price:"€4 200", unit:"strategy only",
       bg:F.yellow, fg:F.navy, accent:F.indigo,
       lede:"Pure strategy sprint when you already have production. Category, promise, language. No shoot.",
       bullets:["Async diagnostic","Positioning document","Content audit","One 60-min direction call"],
       cta:"Book the Intensive" },
-    { n:"IV", name:"The Retainer", price:"€1,600/mo", unit:"direction as a service",
+    { n:"IV", name:"The Retainer", price:"€4 800/mo", unit:"direction as a service",
       bg:F.coral, fg:F.white, accent:F.yellow,
       lede:"We run your brand the way a label runs an artist. Monthly direction, monthly shoots, quarterly re-audits.",
       bullets:["Monthly direction call","Monthly content day","Quarterly re-audit","Priority creative response"],
@@ -1156,10 +1156,10 @@ function FApply({ onNav }) {
           {step===4 && (
             <FStep title="Which door feels like yours?" sub="Don't overthink — the audit sets the final scope.">
               <FRadio value={d.tier} onChange={v=>up("tier",v)} options={[
-                ["opening","The Opening · €480","Studio day · quick upgrade"],
-                ["signature","The Signature · €2,400","Full brand build · 6 weeks"],
-                ["positioning","The Positioning · €1,200","Strategy only · no shoot"],
-                ["retainer","The Retainer · €1,600/mo","Ongoing direction"],
+                ["opening","The Opening · €6 500","Studio day · 2-week turnaround"],
+                ["signature","The Signature · €18 000","Full brand build · 6 weeks"],
+                ["positioning","The Positioning · €4 200","Strategy only · no shoot"],
+                ["retainer","The Retainer · €4 800/mo","Ongoing direction"],
                 ["unsure","Not sure — audit me","We'll recommend after the call"],
               ]}/>
             </FStep>
