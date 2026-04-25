@@ -3,3 +3,14 @@
 .env
 .playwright-mcp/
 tmp_docx_text.txt
+
+# Ephemeral / scratch (per CLAUDE.md)
+tmp_*/
+output/
+
+# Debugging screenshots at repo root
+/*.png
+
+# Strategy generators (scratch Python helpers)
+strategy/_gen_*.py
+strategy/_generate_*.py
