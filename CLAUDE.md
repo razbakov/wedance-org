@@ -39,11 +39,14 @@ Maps artefact types to paths inside `~/Orgs/ikigai/`. Agents must read here befo
 
 Full index: `~/Projects/INDEX.md`. See **Work Domains** below for the grouped view.
 
-### External code (not in ~/Orgs or ~/Projects yet)
+`~/Projects/` itself is a meta-repo backing up the doc-only project folders. See **GitHub Repo Map** below.
 
-| Project | Path | Status | Context |
-|---------|------|--------|---------|
-| Gig Agent | `~/Documents/Projects CURSOR/gig-agent` | Active — SDTV tooling | Monday.com + Telegram gig CRM |
+### External code (not in ~/Orgs or ~/Projects)
+
+| Project | Path | GitHub | Status | Context |
+|---------|------|--------|--------|---------|
+| Gig Agent | `~/Documents/Projects CURSOR/gig-agent` | `razbakov/gig-agent` | Active — SDTV tooling | Monday.com + Telegram gig CRM |
+| WeDance 2026 | `~/Documents/Projects CURSOR/wedance-2026` | `razbakov/wedance-2026` | Active — S3 governance | WeDance org governance docs (00-03 dirs). Same repo accessible as ikigai's `project` remote — separate clone for direct work. |
 
 ### Work Domains
 
@@ -58,6 +61,29 @@ Full index with owners, goals, progress: `~/Projects/INDEX.md`
 **Personal ops (stays in `~/Orgs/ikigai/personal/`):** `personal/health/` (Sage) · `personal/sales/` (Marco, Wallapop) · `personal/purchases/` (Maya)
 
 Rule: before recommending action on any of these domains, read its `README.md`. Append to `decisions.md` when committing to change.
+
+### GitHub Repo Map (8 git repos across 3 GitHub accounts)
+
+Single source of truth for "where does this code live?" — agents must read this before assuming.
+
+| Local path | GitHub | Default branch | Notes |
+|------------|--------|----------------|-------|
+| `~/Orgs/ikigai` | `org` → razbakov/wedance-org<br>`project` → razbakov/wedance-2026<br>`sdtv` → SocialDanceTV/sdtv | `master` (on `org`) | **Multi-purpose worktree on 3 different GitHub repos.** `master` ↔ `org/master` (personal ops). `org/main` is a SEPARATE history (WeDance S3 governance). `sdtv` remote shares branches like `feat/resend-migration`. |
+| `~/Orgs/sdtv-org` | SocialDanceTV/sdtv-org | `main` | SDTV S3 governance (logbook, domains, roles) |
+| `~/Projects/` (meta) | Kirkors/projects-meta (private) | `main` | Backs up 11 doc-only project folders. Code-repo subdirs (`brandbureau/`, `ikeegai-site/`, `sdtv-main-site/`) are gitignored — they have their own remotes. |
+| `~/Projects/sdtv-main-site` | SocialDanceTV/sdtv | `main` | Nuxt 4 SDTV site (Alex+Egor active dev) |
+| `~/Projects/sdtv-main-site/legacy/studio` | SocialDanceTV/sdtv-studio | `master` | Frozen Express+Airtable prototype on Railway (own .git, gitignored from parent) |
+| `~/Projects/brandbureau` | Kirkors/brandbureau | `main` | Nuxt site |
+| `~/Projects/ikeegai-site` | Kirkors/ikeegai | `main` | iKEEGAi orchestrator Nuxt site |
+| `~/Documents/Projects CURSOR/gig-agent` | razbakov/gig-agent | `main` | See External code above |
+| `~/Documents/Projects CURSOR/wedance-2026` | razbakov/wedance-2026 | `main` | See External code above |
+
+**GitHub accounts in use:**
+- **razbakov** — primary personal account; hosts wedance-org, wedance-2026, gig-agent
+- **Kirkors** — secondary personal account (active `gh auth`); hosts brandbureau, ikeegai, projects-meta
+- **SocialDanceTV** — business org; hosts sdtv (main site), sdtv-org (governance), sdtv-studio (legacy)
+
+When creating new GitHub repos: default to `Kirkors/*` (gh CLI is auth'd there). For SDTV business code, use `SocialDanceTV/*`. Don't mix.
 
 ## Agent Team
 
@@ -395,13 +421,13 @@ When a task has a human final owner, agents:
 - Skills must never be saved in `~/Orgs/ikigai/.claude/skills/`. All skills must be shareable and reusable by other users — save them to `~/.local/share/skill-mix/sources/skills@razbakov/skills/`.
 - Don't include config (URLs, chat links, API paths, project-specific mappings) in skills. Config belongs in the organisation or project CLAUDE.md. Skills must stay generic and reusable.
 - When a task requires the user's authenticated browser session (social media, developer consoles, dashboards, any site where the user is signed in): use `mcp__Claude_in_Chrome__tabs_context_mcp` to connect to the user's existing browser, then use Claude in Chrome tools (`navigate`, `computer`, `read_page`, `find`, `form_input`).
-- When asked to "create organization": (1) find the related project under `~/Projects/` and extract all context (README, CLAUDE.md, product docs, brand, etc.), (2) create `~/Orgs/<OrgName>/` using `/org-coach` on autopilot — full S3 structure with governance, domains, roles, agent definitions, (3) always create fresh, org-specific agents (Coordinator, Autopilot, and domain-specific roles) — never reuse existing agents like Maya/Viktor/Luna/Marco/Kai/Sage (they have different responsibilities and context per org), (4) add a routing agent to ikigai's `.claude/agents/` that `cd`s to the org and runs `claude --agent coordinator`. The envoy bot auto-discovers orgs from `~/Orgs/` — no registration needed. See `~/Orgs/WeDance/.claude/agents/` for reference.
+- When asked to "create organization": (1) find the related project under `~/Projects/` and extract all context (README, CLAUDE.md, product docs, brand, etc.), (2) create `~/Orgs/<OrgName>/` using `/org-coach` on autopilot — full S3 structure with governance, domains, roles, agent definitions, (3) always create fresh, org-specific agents (Coordinator, Autopilot, and domain-specific roles) — never reuse existing agents like Maya/Viktor/Luna/Marco/Kai/Sage (they have different responsibilities and context per org), (4) add a routing agent to ikigai's `.claude/agents/` that `cd`s to the org and runs `claude --agent coordinator`. The envoy bot auto-discovers orgs from `~/Orgs/` — no registration needed. Reference: `~/Documents/Projects CURSOR/wedance-2026/` (WeDance S3 governance — same pattern: `00_Organization_Logbook/`, `01_Domains/`, `02_Roles/`, `03_Coordination/`).
 - Global `~/.claude/CLAUDE.md` must stay minimal — just personal info and pointers. All rules, skills, prompts, and agents live in their respective project/org CLAUDE.md files so they're shareable and composable.
 - When an API key or token is shared, immediately save it to the appropriate `.env` file (project-level or `~/.zshrc` for global keys), then use it from there. Never leave keys only in chat history.
 
 ## Rules — Shortcuts
 
-- `amado email` — open Gmail, find latest email from Amado, implement changes in dancegods codebase (`~/Projects/dancegodscompany/engineering/website`).
+- `amado email` — open Gmail, find latest email from Amado, implement changes in dancegods codebase. **Note (2026-04-25):** `~/Projects/dancegodscompany/engineering/website` no longer exists on this machine — clone from GitHub before using, or remove this shortcut.
 - `plan it` — check if current output/research is saved to a file. If not, save it first. Then create a GitHub issue in the appropriate project repo (agent label + S3 body) and add it to the Ikigai Control Center Project v2 board (`gh project item-add 5 --owner razbakov --url <issue-url>`).
 - `health` — run full systems health check: agent bots, Telegram bots, scheduled tasks, MCP servers, auth tokens, Butler/tunnels. Report as pass/fail status board.
 - `sync` — check git status of all projects and orgs (from Project Registry), commit any uncommitted changes with descriptive messages, and push all repos.
