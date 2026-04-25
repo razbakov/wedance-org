@@ -1,5 +1,8 @@
 # SDTV — Commercial Model & Unit Economics
 
+> **CANONICAL:** `~/Projects/sdtv-festivals/production-pipeline.md` (editor rates + invoice math) and `~/Projects/sdtv-festivals/commercial-model.md` (KPIs + value-flip).
+> This file = Marco's agent-specific lens. Edit canonical first.
+
 last_updated: 2026-04-06
 
 ## Editor Cost Structure

@@ -1,5 +1,8 @@
 # SDTV — Community Psychology & Business Model Reality
 
+> **CANONICAL:** `~/Projects/sdtv-festivals/commercial-model.md` (festivals-rotate-videographers + existing-vs-new client transition rule).
+> This file = Kai's agent-specific lens. Edit canonical first.
+
 last_updated: 2026-04-07
 source: founder insight
 

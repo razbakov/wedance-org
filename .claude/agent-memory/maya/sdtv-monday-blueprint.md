@@ -1,5 +1,8 @@
 # SDTV — Monday.com Board Blueprint
 
+> **CANONICAL:** `~/Projects/sdtv-festivals/monday-blueprint.md` (4 boards + stage weights + evaluation criteria + friction journal).
+> This file = Maya's agent-specific lens. Edit canonical first.
+
 last_updated: 2026-04-07
 source: founder operational framework
 status: REFERENCE ONLY — founder already has Monday structure, not yet tested on real festival

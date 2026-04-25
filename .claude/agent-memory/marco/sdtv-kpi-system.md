@@ -1,5 +1,8 @@
 # SDTV — KPI System 2026
 
+> **CANONICAL:** `~/Projects/sdtv-festivals/commercial-model.md` (8 KPIs + targets + red flags + ownership + review rhythm).
+> This file = Marco's agent-specific lens. Edit canonical first.
+
 last_updated: 2026-04-07
 source: founder strategic framework
 

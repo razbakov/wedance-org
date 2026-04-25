@@ -1,5 +1,8 @@
 # SDTV — Value Proposition Flip (Strategic Framework)
 
+> **CANONICAL:** `~/Projects/sdtv-festivals/commercial-model.md` (value-flip mantra + 3 products + transition rule).
+> This file = Marco's agent-specific lens. Edit canonical first.
+
 last_updated: 2026-04-07
 source: founder reflection + strategic analysis
 

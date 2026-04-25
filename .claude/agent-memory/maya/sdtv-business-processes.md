@@ -1,5 +1,8 @@
 # SDTV — Business Processes & Operations Context
 
+> **CANONICAL:** `~/Projects/sdtv-festivals/production-pipeline.md` (capture→invoice, festival lifecycle, IDs, delivery formats, team roles).
+> This file = Maya's agent-specific lens. Edit canonical first.
+
 last_updated: 2026-04-06
 
 ## Tool Stack & CRM Architecture
