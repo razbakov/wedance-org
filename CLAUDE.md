@@ -3,15 +3,61 @@
 - Org path: `~/Orgs/ikigai`
 - Issue tracker: GitHub Issues
 - Owner: Кирилл
+- Methodology: `/org-coach` (Sociocracy 3.0). Full S3 bootstrap (Primary Driver, Canvas, Domains w/ Delegation Canvas, Roles) is **pending** — only `## Structure` section is populated so far.
+
+## Structure
+
+Maps artefact types to paths inside `~/Orgs/ikigai/`. Agents must read here before assuming where things live — never hardcode paths.
+
+| Artefact | Path | Notes |
+|----------|------|-------|
+| Agent definitions | `.claude/agents/` | One file per agent (maya, viktor, luna, marco, sage, kai) |
+| Agent working memory | `.claude/agent-memory/<agent>/` | Per-agent state, notes, drafts |
+| Org rules (this file) | `CLAUDE.md` | Agent OS, protocols, triage, decision matrix |
+| Inter-agent protocol | `ops/inter-agent-protocol.md` | Full reference (precedence order: CLAUDE.md > this) |
+| Daily/weekly templates | `ops/templates/` | Daily review, scrum, weekly review |
+| Session logs | `ops/sessions/` (daily), `ops/reviews/` (weekly) | Dated log files |
+| Sprint plans | `ops/sprints/` and `sprints/` | Current: `sprint-2026-04-22.md` |
+| Strategy docs | `strategy/` | Master brief, OKRs, business operating picture, personal-brand, 3-funnel, etc. |
+| Coaching / assessments | `assessments/` + `profile.md` | Sage owns |
+| Contacts | `contacts/` | One markdown file per person, Kai manages |
+| Personal ops | `personal/health/` · `personal/sales/` · `personal/purchases/` | Life ops, NOT projects |
+| Design system assets | `design-systems/` | Lumen Atelier and related design packs |
+| Scratch / WIP | `tmp_*`, `output/` | Ephemeral |
+| Current focus | `now.md` | What's active right now |
 
 ## Project Registry
 
+### Organizations (`~/Orgs/`, S3 / `/org-coach`)
+
+| Org | Path | Status | Context |
+|-----|------|--------|---------|
+| SDTV Org | `~/Orgs/sdtv-org` | Active — S3 org | Governance for SDTV business (logbook, domains, roles, .claude/agents) |
+| Ikigai Team | `~/Orgs/ikigai` | Active — personal OS | Agent system, ops, personal/, strategy, control tower. Full S3 bootstrap pending. |
+
+### Projects (`~/Projects/`, Design Sprint / `/product-coach`)
+
+Full index: `~/Projects/INDEX.md`. See **Work Domains** below for the grouped view.
+
+### External code (not in ~/Orgs or ~/Projects yet)
+
 | Project | Path | Status | Context |
 |---------|------|--------|---------|
-| Social Dance TV | ~/Orgs/sdtv | Active — primary business | Default context when unspecified |
-| SDTV Org | ~/Orgs/sdtv-org | Active — SDTV organization | GitHub org config, team, shared settings |
-| Ikigai Team (ops) | ~/Orgs/ikigai | Active — personal OS | Agent system, ops, coordination |
-| Gig Agent | ~/Documents/Projects CURSOR/gig-agent | Active — SDTV tooling | Monday.com + Telegram gig CRM |
+| Gig Agent | `~/Documents/Projects CURSOR/gig-agent` | Active — SDTV tooling | Monday.com + Telegram gig CRM |
+
+### Work Domains
+
+All projects live flat under `~/Projects/` (moved 2026-04-24 from `~/Orgs/ikigai/projects/` + `ventures/`; the project/venture distinction is collapsed — everything is just a "project").
+
+Full index with owners, goals, progress: `~/Projects/INDEX.md`
+
+**SDTV Core:** `~/Projects/sdtv-festivals/` (Marco+Kai), `~/Projects/smm-festivals/` (Luna), `~/Projects/sdtv-media/` (dormant), `~/Projects/sdtv-main-site/` (Viktor, Nuxt code)
+**SDTV Adjacent:** `~/Projects/own-festival/` (Marco+Maya), `~/Projects/organization/` (Maya)
+**Personal/Alt:** `~/Projects/job-corporate/` (Sage+Marco, dormant)
+**Independent bets:** `~/Projects/arancha-brand/` (Luna+Kai+Sage), `~/Projects/artist-brand-studio/` (Lumen Atelier), `~/Projects/wedance-alex/` (Kirill × Alex, 50/50), `~/Projects/kiara-visuals/` (dormant), `~/Projects/ikeegai-site/` (Kirill × Alex, Nuxt), `~/Projects/brandbureau/` (Nuxt)
+**Personal ops (stays in `~/Orgs/ikigai/personal/`):** `personal/health/` (Sage) · `personal/sales/` (Marco, Wallapop) · `personal/purchases/` (Maya)
+
+Rule: before recommending action on any of these domains, read its `README.md`. Append to `decisions.md` when committing to change.
 
 ## Agent Team
 
@@ -338,6 +384,32 @@ When a task has a human final owner, agents:
 - No jargon without explanation
 - **One change = one branch.** Every distinct change (feature, fix, refactor) gets its own git branch. Do not mix unrelated changes in a single branch. Name branches descriptively (e.g., `fix/email-crash`, `feat/premium-redesign`). One commit per change is ideal — no more than 3 commits per branch.
 - **Done = pull request.** When a change is complete, create a PR to `main`. Do not leave finished work on a branch without a PR.
+
+## Rules — Core
+
+- When I say `rule: <text>` — decide whether the rule is project-specific or global, add it to the appropriate CLAUDE.md (project or `~/.claude/CLAUDE.md`), and execute it immediately.
+- When I say `learned?` — analyze the process that just happened, extract lessons/insights, and add them to the project README.
+- When I say `new skill` — analyze the current conversation to extract the repeatable process that was just performed, then create a SKILL.md that captures it: trigger conditions, step-by-step process, inputs/outputs, templates used, and integration points. The skill should let anyone (human or AI) reproduce the same workflow from scratch.
+- When I say `save` — commit all changes, update all relevant docs and maps (CLAUDE.md project registries, `now.md`, strategy trackers, metrics, etc.) to reflect the current state. This is a checkpoint — make sure nothing is lost or out of sync. After committing, always ask "skills?" — evaluate whether the process just performed should become a reusable skill. If yes, create it; if not, say so briefly and move on.
+- Paths and configurations should be on the project level. Skills can use paths only inside templates to set up when needed, or as aliases for lookup.
+- Skills must never be saved in `~/Orgs/ikigai/.claude/skills/`. All skills must be shareable and reusable by other users — save them to `~/.local/share/skill-mix/sources/skills@razbakov/skills/`.
+- Don't include config (URLs, chat links, API paths, project-specific mappings) in skills. Config belongs in the organisation or project CLAUDE.md. Skills must stay generic and reusable.
+- When a task requires the user's authenticated browser session (social media, developer consoles, dashboards, any site where the user is signed in): use `mcp__Claude_in_Chrome__tabs_context_mcp` to connect to the user's existing browser, then use Claude in Chrome tools (`navigate`, `computer`, `read_page`, `find`, `form_input`).
+- When asked to "create organization": (1) find the related project under `~/Projects/` and extract all context (README, CLAUDE.md, product docs, brand, etc.), (2) create `~/Orgs/<OrgName>/` using `/org-coach` on autopilot — full S3 structure with governance, domains, roles, agent definitions, (3) always create fresh, org-specific agents (Coordinator, Autopilot, and domain-specific roles) — never reuse existing agents like Maya/Viktor/Luna/Marco/Kai/Sage (they have different responsibilities and context per org), (4) add a routing agent to ikigai's `.claude/agents/` that `cd`s to the org and runs `claude --agent coordinator`. The envoy bot auto-discovers orgs from `~/Orgs/` — no registration needed. See `~/Orgs/WeDance/.claude/agents/` for reference.
+- Global `~/.claude/CLAUDE.md` must stay minimal — just personal info and pointers. All rules, skills, prompts, and agents live in their respective project/org CLAUDE.md files so they're shareable and composable.
+- When an API key or token is shared, immediately save it to the appropriate `.env` file (project-level or `~/.zshrc` for global keys), then use it from there. Never leave keys only in chat history.
+
+## Rules — Shortcuts
+
+- `amado email` — open Gmail, find latest email from Amado, implement changes in dancegods codebase (`~/Projects/dancegodscompany/engineering/website`).
+- `plan it` — check if current output/research is saved to a file. If not, save it first. Then create a GitHub issue in the appropriate project repo (agent label + S3 body) and add it to the Ikigai Control Center Project v2 board (`gh project item-add 5 --owner razbakov --url <issue-url>`).
+- `health` — run full systems health check: agent bots, Telegram bots, scheduled tasks, MCP servers, auth tokens, Butler/tunnels. Report as pass/fail status board.
+- `sync` — check git status of all projects and orgs (from Project Registry), commit any uncommitted changes with descriptive messages, and push all repos.
+- `remind me ...` — pick the surface based on whether the reminder is time-anchored:
+  - Has a specific start time (meeting, appointment, hard block, recurring time slot) → Google Calendar via `gog cal create`. Default 15 min; full context in `--description=`.
+  - Action item without a fixed doing-time (a call to make, errand, followup, quick send, reading) → Google Tasks via `gog tasks add`. Default list: Plan (ID `OXVhWGR2VkFOODhmXzRWLQ`). Use `--due=YYYY-MM-DD` if there's a deadline.
+  - Never put an untimed action on Calendar just to "not forget it" — that's what Tasks is for.
+  - Never put a hard appointment in Tasks — Calendar is the only surface with time-of-day semantics.
 
 ## Current OKRs (Q2 2026)
 

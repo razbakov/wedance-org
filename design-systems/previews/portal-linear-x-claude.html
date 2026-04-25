@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Portal · Linear × Claude</title>
+<style>
+  :root{
+    --bg:#ffffff; --bg-alt:#fafafa; --surface:#f4f4f5;
+    --text:#0f0f14; --text-muted:#6b6b76; --text-dim:#a0a0ab;
+    --border:#e4e4e7; --border-strong:#d4d4d8;
+    --accent:#c96442; --accent-hover:#b55738; --accent-soft:#e89268;
+    --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font:14px/1.5 'Inter',system-ui,-apple-system,sans-serif;
+    font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased}
+  .shell{max-width:1180px;margin:0 auto;padding:24px}
+
+  /* topbar */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0 20px;border-bottom:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-mark{width:28px;height:28px;border-radius:6px;background:var(--text);color:#fff;display:grid;place-items:center;font-weight:600;font-size:12px;letter-spacing:.02em}
+  .brand-name{font-weight:600;font-size:15px;letter-spacing:-.01em}
+  .fest-pick{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg-alt);font-size:13px;font-weight:500}
+  .fest-pick .dot{width:6px;height:6px;border-radius:99px;background:var(--accent)}
+
+  /* tabs */
+  .tabs{display:flex;gap:4px;margin:18px 0 24px;border-bottom:1px solid var(--border)}
+  .tab{padding:10px 14px;font-size:13px;color:var(--text-muted);font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+  .tab:hover:not(.active){color:var(--text)}
+
+  /* page header */
+  .page-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px}
+  .page-title{font:500 28px/1.15 'Tiempos Headline','Charter','Iowan Old Style',Georgia,serif;letter-spacing:-.01em;margin:0}
+  .page-sub{color:var(--text-muted);font-size:13px;margin-top:4px}
+  .open-portal{font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px}
+
+  /* sections */
+  .section{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .section:hover{border-color:var(--border-strong)}
+  .section-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin:0}
+  .section-body{padding:16px}
+
+  /* form grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid-3{grid-template-columns:1fr 1fr 1fr}
+  .field label{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+  .input,.select,textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);font:inherit;font-size:13px}
+  .input:focus,.select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 18%,transparent)}
+  textarea{min-height:72px;resize:vertical;font-family:inherit}
+  .row-actions{display:flex;gap:8px;margin-top:8px}
+
+  /* services toggles */
+  .toggles{display:flex;gap:8px}
+  .toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);cursor:pointer}
+  .toggle.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .toggle .check{width:14px;height:14px;border:1px solid currentColor;border-radius:3px;display:inline-block}
+
+  /* buttons */
+  .btn{padding:8px 14px;border-radius:6px;font:500 13px/1 'Inter',sans-serif;border:1px solid transparent;cursor:pointer;transition:.15s}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent-hover)}
+  .btn-secondary{background:var(--surface);color:var(--text);border-color:var(--border)}
+  .btn-secondary:hover{border-color:var(--border-strong)}
+  .btn-ghost{background:transparent;color:var(--text-muted);border:none;padding:6px 10px}
+  .btn-ghost:hover{color:var(--text)}
+  .add-pill{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border:1px dashed var(--border-strong);border-radius:6px;background:transparent;color:var(--text-muted);font-size:12px;font-weight:500;cursor:pointer}
+  .add-pill:hover{border-style:solid;border-color:var(--accent);color:var(--accent)}
+
+  .footer-bar{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;margin-top:8px;border-top:1px solid var(--border)}
+  .kbd{font:500 11px/1 'Berkeley Mono','SF Mono',monospace;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text-muted)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">SD</div>
+      <div class="brand-name">SDTV Ops</div>
+    </div>
+    <div class="fest-pick"><span class="dot"></span>Mambo Nights 2026 <span style="color:var(--text-dim)">▾</span></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab">Dashboard</div>
+    <div class="tab">Setup</div>
+    <div class="tab">Production</div>
+    <div class="tab">Matching</div>
+    <div class="tab">Connect</div>
+    <div class="tab active">Portal</div>
+  </div>
+
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Client Portal</h1>
+      <div class="page-sub">Per-festival configuration · last saved 2 minutes ago</div>
+    </div>
+    <a class="open-portal" href="#">Open portal ↗</a>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2 class="section-title">Access</h2><span style="font-size:12px;color:var(--text-dim)">PIN required for clients</span></div>
+    <div class="section-body">
+      <div class="grid">
+        <div class="field"><label>Portal PIN</label><div style="display:flex;gap:8px"><input class="input" value="2026" style="flex:1"><button class="btn btn-secondary">Gen</button><button class="btn btn-secondary">Link</button></div></div>
+        <div class="field"><label>Festival logo URL</label><input class="input" placeholder="https://"></div>
+        <div class="field"><label>Status</label><select class="select"><option>Active</option><option>Draft</option></select></div>
+        <div class="field"><label>Festival name (override)</label><input class="input" value="Mambo Nights"></div>
+        <div class="field"><label>Monday item ID</label><div style="display:flex;gap:8px"><input class="input" value="2102145006" style="flex:1"><button class="btn btn-secondary">Sync</button></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2 class="section-title">Active services</h2></div>
+    <div class="section-body">
+      <div class="toggles">
+        <div class="toggle on"><span class="check"></span>Production</div>
+        <div class="toggle"><span class="check"></span>Promo</div>
+        <div class="toggle"><span class="check"></span>SMM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2 class="section-title">Package</h2></div>
+    <div class="section-body">
+      <div class="grid">
+        <div class="field"><label>Package name</label><input class="input" value="Production + Distribution"></div>
+        <div class="field"><label>Tier</label><input class="input" value="2"></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Included items (one per line)</label>
+        <textarea>2-day video coverage
+Aftermovie (5–8 min)
+15 social edits</textarea>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div class="field"><label>Period</label><input class="input" value="Mambo Nights 2026 — May 15–17"></div>
+        <div class="field"><label>Notes</label><input class="input" value="Includes Friday & Saturday coverage"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2 class="section-title">Contract</h2></div>
+    <div class="section-body">
+      <div class="grid grid-3">
+        <div class="field"><label>Status</label><select class="select"><option>Draft</option><option>Pending</option><option>Signed</option></select></div>
+        <div class="field"><label>Contract URL</label><input class="input" placeholder="https://"></div>
+        <div class="field"><label>Note</label><input class="input" value="Signed March 20, 2026"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2 class="section-title">Deliverables</h2>
+      <div style="display:flex;gap:6px"><button class="add-pill">+ Video</button><button class="add-pill">+ Video+Photo</button><button class="add-pill">+ Full set</button><button class="add-pill">+ Add</button></div>
+    </div>
+    <div class="section-body" style="color:var(--text-muted);font-size:13px">No deliverables yet. Use the templates above to seed.</div>
+  </div>
+
+  <div class="footer-bar">
+    <button class="btn btn-secondary">Template: Video</button>
+    <button class="btn btn-secondary">Template: Full</button>
+    <button class="btn btn-secondary">Clone…</button>
+    <button class="btn btn-primary">Save portal settings <span class="kbd" style="background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);color:#fff;margin-left:6px">⌘S</span></button>
+  </div>
+</div>
+</body>
+</html>
