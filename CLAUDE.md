@@ -39,7 +39,7 @@ Maps artefact types to paths inside `~/Orgs/ikigai/`. Agents must read here befo
 
 Full index: `~/Projects/INDEX.md`. See **Work Domains** below for the grouped view.
 
-`~/Projects/` itself is a meta-repo backing up the doc-only project folders. See **GitHub Repo Map** below.
+Каждый проект — свой git-репо (см. **GitHub Repo Map**). `~/Projects/` сама по себе НЕ git — это просто организационная папка.
 
 ### External code (not in ~/Orgs or ~/Projects)
 
@@ -62,15 +62,16 @@ Full index with owners, goals, progress: `~/Projects/INDEX.md`
 
 Rule: before recommending action on any of these domains, read its `README.md`. Append to `decisions.md` when committing to change.
 
-### GitHub Repo Map (8 git repos across 3 GitHub accounts)
+### GitHub Repo Map
 
-Single source of truth for "where does this code live?" — agents must read this before assuming.
+Single source of truth for "where does this code live?" — agents must read this before assuming. Каждый проект = свой git-репо (rule).
+
+**Уже git-репо:**
 
 | Local path | GitHub | Default branch | Notes |
 |------------|--------|----------------|-------|
 | `~/Orgs/ikigai` | `org` → razbakov/wedance-org<br>`project` → razbakov/wedance-2026<br>`sdtv` → SocialDanceTV/sdtv | `master` (on `org`) | **Multi-purpose worktree on 3 different GitHub repos.** `master` ↔ `org/master` (personal ops). `org/main` is a SEPARATE history (WeDance S3 governance). `sdtv` remote shares branches like `feat/resend-migration`. |
 | `~/Orgs/sdtv-org` | SocialDanceTV/sdtv-org | `main` | SDTV S3 governance (logbook, domains, roles) |
-| `~/Projects/` (meta) | Kirkors/projects-meta (private) | `main` | Backs up 11 doc-only project folders. Code-repo subdirs (`brandbureau/`, `ikeegai-site/`, `sdtv-main-site/`) are gitignored — they have their own remotes. |
 | `~/Projects/sdtv-main-site` | SocialDanceTV/sdtv | `main` | Nuxt 4 SDTV site (Alex+Egor active dev) |
 | `~/Projects/sdtv-main-site/legacy/studio` | SocialDanceTV/sdtv-studio | `master` | Frozen Express+Airtable prototype on Railway (own .git, gitignored from parent) |
 | `~/Projects/brandbureau` | Kirkors/brandbureau | `main` | Nuxt site |
@@ -78,9 +79,13 @@ Single source of truth for "where does this code live?" — agents must read thi
 | `~/Documents/Projects CURSOR/gig-agent` | razbakov/gig-agent | `main` | See External code above |
 | `~/Documents/Projects CURSOR/wedance-2026` | razbakov/wedance-2026 | `main` | See External code above |
 
+**Doc-only проекты — нужен свой git-репо у каждого (PENDING decision):**
+
+`~/Projects/` имеет 10 doc-only папок без git: `arancha-brand`, `artist-brand-studio`, `job-corporate`, `kiara-visuals`, `organization`, `own-festival`, `sdtv-festivals`, `sdtv-media`, `smm-festivals`, `wedance-alex` (+ `_TEMPLATE`). Решение об именовании/аккаунте/private-vs-public — за Кириллом.
+
 **GitHub accounts in use:**
 - **razbakov** — primary personal account; hosts wedance-org, wedance-2026, gig-agent
-- **Kirkors** — secondary personal account (active `gh auth`); hosts brandbureau, ikeegai, projects-meta
+- **Kirkors** — secondary personal account (active `gh auth`); hosts brandbureau, ikeegai
 - **SocialDanceTV** — business org; hosts sdtv (main site), sdtv-org (governance), sdtv-studio (legacy)
 
 When creating new GitHub repos: default to `Kirkors/*` (gh CLI is auth'd there). For SDTV business code, use `SocialDanceTV/*`. Don't mix.

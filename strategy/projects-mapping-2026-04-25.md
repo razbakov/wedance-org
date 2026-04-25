@@ -151,11 +151,11 @@
 - `legacy/studio` — `admin.html` glass-effect dropdown → master, push.
 - `wedance-2026` — `.gitignore` создан + смерджен с remote через rebase (remote уже имел свой) → push.
 
-### Meta-репо для doc-папок ✓
-- `~/Projects/.git` инициализирован
-- 55 файлов закоммичено (11 doc-папок: arancha-brand, artist-brand-studio, job-corporate, kiara-visuals, organization, own-festival, sdtv-festivals, sdtv-media, smm-festivals, wedance-alex, _TEMPLATE) + INDEX.md + новый README.md
-- 3 nested code-репо (brandbureau, ikeegai-site, sdtv-main-site) корректно gitignored
-- Создан **private GitHub repo: https://github.com/Kirkors/projects-meta** + push
+### Meta-репо для doc-папок ❌ ОТКАЧЕНО (2026-04-25)
+- Создан и потом удалён по решению Кирилла: каждый проект должен иметь свой git-репо, не общий meta-репо.
+- Локально: `rm -rf ~/Projects/.git`, `~/Projects/.gitignore`, `~/Projects/README.md`
+- Remote: `gh repo delete Kirkors/projects-meta`
+- **PENDING:** правильное решение — создать по одному git-репо на каждую doc-папку (нужны решения от Кирилла: GitHub-аккаунт, naming, private/public).
 
 ### CLAUDE.md обновлён
 - External code: добавлен `wedance-2026` (был в `~/Documents/Projects CURSOR/`, не зарегистрирован)
@@ -168,7 +168,7 @@
 
 | Что | Почему | Действие |
 |-----|--------|----------|
-| `~/Orgs/sdtv/` пустая папка | "Device or resource busy" — Windows процесс держит. Возможно VSCode или Explorer. | Закрыть все приложения и `rmdir ~/Orgs/sdtv` вручную |
+| `~/Orgs/sdtv/` пустая папка | Кирилл указал что удаление было неоправданным предположением — оставить как есть | Не трогать. Если когда-то нужно удалить — это решение Кирилла, не агента. |
 | ikigai multi-remote сетап | Архитектурное решение | Оставлено как есть; теперь задокументировано в CLAUDE.md |
 | brandbureau + ikeegai-site под Kirkors | То же | Задокументировано; миграция в razbakov/ опциональна |
 | `feat/resend-migration` 95 ahead на sdtv | Реальная WIP, не мусор | Решить: довести и замержить в sdtv/main, или закрыть как abandoned |
