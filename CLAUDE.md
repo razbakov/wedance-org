@@ -62,11 +62,11 @@ Full index with owners, goals, progress: `~/Projects/INDEX.md`
 
 Rule: before recommending action on any of these domains, read its `README.md`. Append to `decisions.md` when committing to change.
 
-### GitHub Repo Map
+### GitHub Repo Map (19 git repos across 3 GitHub accounts)
 
-Single source of truth for "where does this code live?" — agents must read this before assuming. Каждый проект = свой git-репо (rule).
+Single source of truth for "where does this code live?" — agents must read this before assuming. Rule: каждый проект = свой git-репо.
 
-**Уже git-репо:**
+**Code & governance:**
 
 | Local path | GitHub | Default branch | Notes |
 |------------|--------|----------------|-------|
@@ -79,14 +79,26 @@ Single source of truth for "where does this code live?" — agents must read thi
 | `~/Documents/Projects CURSOR/gig-agent` | razbakov/gig-agent | `main` | See External code above |
 | `~/Documents/Projects CURSOR/wedance-2026` | razbakov/wedance-2026 | `main` | See External code above |
 
-**Doc-only проекты — нужен свой git-репо у каждого (PENDING decision):**
+**Doc-only project repos** (created 2026-04-25; private; каждый = свой репо):
 
-`~/Projects/` имеет 10 doc-only папок без git: `arancha-brand`, `artist-brand-studio`, `job-corporate`, `kiara-visuals`, `organization`, `own-festival`, `sdtv-festivals`, `sdtv-media`, `smm-festivals`, `wedance-alex` (+ `_TEMPLATE`). Решение об именовании/аккаунте/private-vs-public — за Кириллом.
+| Local path | GitHub | Default branch | Notes |
+|------------|--------|----------------|-------|
+| `~/Projects/arancha-brand` | Kirkors/arancha-brand | `main` | Arancha (wife) brand venture |
+| `~/Projects/artist-brand-studio` | Kirkors/artist-brand-studio | `main` | Lumen Atelier — BCN image practice |
+| `~/Projects/job-corporate` | Kirkors/job-corporate | `main` | Corporate job track (dormant) |
+| `~/Projects/kiara-visuals` | Kirkors/kiara-visuals | `main` | KIARA Visuals (dormant) |
+| `~/Projects/wedance-alex` | Kirkors/wedance-alex | `main` | WeDance (Alex × Kirill 50/50) |
+| `~/Projects/_TEMPLATE` | Kirkors/project-template | `main` | Template for new doc-only projects |
+| `~/Projects/sdtv-festivals` | SocialDanceTV/sdtv-festivals | `main` | SDTV Festivals — primary B2B engine |
+| `~/Projects/smm-festivals` | SocialDanceTV/smm-festivals | `main` | SDTV social media for festivals |
+| `~/Projects/sdtv-media` | SocialDanceTV/sdtv-media | `main` | SDTV Media (dormant) |
+| `~/Projects/own-festival` | SocialDanceTV/own-festival | `main` | Own festival venture |
+| `~/Projects/organization` | SocialDanceTV/organization | `main` | SDTV team organization |
 
 **GitHub accounts in use:**
 - **razbakov** — primary personal account; hosts wedance-org, wedance-2026, gig-agent
-- **Kirkors** — secondary personal account (active `gh auth`); hosts brandbureau, ikeegai
-- **SocialDanceTV** — business org; hosts sdtv (main site), sdtv-org (governance), sdtv-studio (legacy)
+- **Kirkors** — secondary personal account (active `gh auth`); hosts brandbureau, ikeegai + 6 doc-only projects
+- **SocialDanceTV** — business org; hosts sdtv, sdtv-org, sdtv-studio + 5 SDTV-related doc-only projects
 
 When creating new GitHub repos: default to `Kirkors/*` (gh CLI is auth'd there). For SDTV business code, use `SocialDanceTV/*`. Don't mix.
 

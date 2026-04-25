@@ -155,7 +155,27 @@
 - Создан и потом удалён по решению Кирилла: каждый проект должен иметь свой git-репо, не общий meta-репо.
 - Локально: `rm -rf ~/Projects/.git`, `~/Projects/.gitignore`, `~/Projects/README.md`
 - Remote: `gh repo delete Kirkors/projects-meta`
-- **PENDING:** правильное решение — создать по одному git-репо на каждую doc-папку (нужны решения от Кирилла: GitHub-аккаунт, naming, private/public).
+
+### Per-project repos ✅ (2026-04-25, по дефолту)
+
+11 doc-only проектов получили свой git-репо. Все private. Naming = lowercase folder name as-is.
+
+**Kirkors (6):**
+- arancha-brand → https://github.com/Kirkors/arancha-brand
+- artist-brand-studio → https://github.com/Kirkors/artist-brand-studio
+- job-corporate → https://github.com/Kirkors/job-corporate
+- kiara-visuals → https://github.com/Kirkors/kiara-visuals
+- wedance-alex → https://github.com/Kirkors/wedance-alex
+- _TEMPLATE → https://github.com/Kirkors/project-template (rename: уход от leading underscore в repo name)
+
+**SocialDanceTV (5):**
+- sdtv-festivals → https://github.com/SocialDanceTV/sdtv-festivals
+- smm-festivals → https://github.com/SocialDanceTV/smm-festivals
+- sdtv-media → https://github.com/SocialDanceTV/sdtv-media
+- own-festival → https://github.com/SocialDanceTV/own-festival
+- organization → https://github.com/SocialDanceTV/organization
+
+INDEX.md в `~/Projects/` остаётся floating (не привязан ни к одному репо) — это просто карта. Можно перенести в ikigai если решишь.
 
 ### CLAUDE.md обновлён
 - External code: добавлен `wedance-2026` (был в `~/Documents/Projects CURSOR/`, не зарегистрирован)
