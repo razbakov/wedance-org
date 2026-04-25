@@ -160,13 +160,14 @@
 
 11 doc-only проектов получили свой git-репо. Все private. Naming = lowercase folder name as-is.
 
-**Kirkors (6):**
+**Kirkors (5):**
 - arancha-brand → https://github.com/Kirkors/arancha-brand
 - artist-brand-studio → https://github.com/Kirkors/artist-brand-studio
 - job-corporate → https://github.com/Kirkors/job-corporate
 - kiara-visuals → https://github.com/Kirkors/kiara-visuals
 - wedance-alex → https://github.com/Kirkors/wedance-alex
-- _TEMPLATE → https://github.com/Kirkors/project-template (rename: уход от leading underscore в repo name)
+
+**`_TEMPLATE` локально без git** — это просто шаблон для копирования при создании нового проекта, не нужен GitHub-репо.
 
 **SocialDanceTV (5):**
 - sdtv-festivals → https://github.com/SocialDanceTV/sdtv-festivals

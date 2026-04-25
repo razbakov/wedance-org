@@ -62,7 +62,7 @@ Full index with owners, goals, progress: `~/Projects/INDEX.md`
 
 Rule: before recommending action on any of these domains, read its `README.md`. Append to `decisions.md` when committing to change.
 
-### GitHub Repo Map (19 git repos across 3 GitHub accounts)
+### GitHub Repo Map (18 git repos across 3 GitHub accounts)
 
 Single source of truth for "where does this code live?" — agents must read this before assuming. Rule: каждый проект = свой git-репо.
 
@@ -88,7 +88,6 @@ Single source of truth for "where does this code live?" — agents must read thi
 | `~/Projects/job-corporate` | Kirkors/job-corporate | `main` | Corporate job track (dormant) |
 | `~/Projects/kiara-visuals` | Kirkors/kiara-visuals | `main` | KIARA Visuals (dormant) |
 | `~/Projects/wedance-alex` | Kirkors/wedance-alex | `main` | WeDance (Alex × Kirill 50/50) |
-| `~/Projects/_TEMPLATE` | Kirkors/project-template | `main` | Template for new doc-only projects |
 | `~/Projects/sdtv-festivals` | SocialDanceTV/sdtv-festivals | `main` | SDTV Festivals — primary B2B engine |
 | `~/Projects/smm-festivals` | SocialDanceTV/smm-festivals | `main` | SDTV social media for festivals |
 | `~/Projects/sdtv-media` | SocialDanceTV/sdtv-media | `main` | SDTV Media (dormant) |
@@ -97,7 +96,7 @@ Single source of truth for "where does this code live?" — agents must read thi
 
 **GitHub accounts in use:**
 - **razbakov** — primary personal account; hosts wedance-org, wedance-2026, gig-agent
-- **Kirkors** — secondary personal account (active `gh auth`); hosts brandbureau, ikeegai + 6 doc-only projects
+- **Kirkors** — secondary personal account (active `gh auth`); hosts brandbureau, ikeegai + 5 doc-only projects
 - **SocialDanceTV** — business org; hosts sdtv, sdtv-org, sdtv-studio + 5 SDTV-related doc-only projects
 
 When creating new GitHub repos: default to `Kirkors/*` (gh CLI is auth'd there). For SDTV business code, use `SocialDanceTV/*`. Don't mix.
