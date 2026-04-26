@@ -4,6 +4,28 @@
 
 Снизить фоновое напряжение, стать устойчивее в отношениях и перестроить ритм жизни так, чтобы в нём было больше внутренней свободы, а не только функции.
 
+## Brand Bureau (= Lumen Atelier) — статус на 2026-04-26
+
+Сайт `brandbureau.vercel.app` готов как proof shelf. Запуск воронки через SDTV — заблокирован 2 вопросами (жена + цены).
+
+**В проде сейчас:**
+- 2 реальных кейса (Anastasia, Rawad) с премиум-полировкой
+- Полная EN + ES funnel (4 detail pages)
+- Source/case/intent/vertical attribution в email при заявке
+- Large-screen lock, hero responsive
+
+**Открытые PR на ревью** (не задеплоены в прод):
+- [#1 Перевод hero, Client Case label, Rawad performer CTA, vertical attribution](https://github.com/Kirkors/brandbureau/pull/1)
+- [#2 Privacy Policy + GDPR consent на /apply (EN+ES)](https://github.com/Kirkors/brandbureau/pull/2)
+
+**Что осталось до запуска "Comment ARTIST" поста на SDTV:**
+1. Жена — 15-мин разговор, согласна ли на дополнительный editorial контент на её SMM-канале
+2. Цены — утвердить лестницу: €0 / €200 / €590-790 / €2400 / €800-1500/мес
+3. Merge оба PR + `vercel deploy --prod --yes`
+4. Server-side consent guard в /api/apply (10-минутный follow-up)
+
+**Stop-rule (Sage):** если жена → "не сейчас", парковка Brand Bureau до закрытия SDTV festival cycle (Q3).
+
 ## OKRs This Quarter (Q2 2026)
 
 **O1: Бизнес на системе, а не на мне**
