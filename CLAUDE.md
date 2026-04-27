@@ -352,6 +352,20 @@ When a task has a human final owner, agents:
 - do NOT substitute for human judgment, taste, or relationship presence
 - stay available for iteration after the human acts
 
+## Founder Time Gate (Maya)
+
+**Rule (set 2026-04-27):** Kirill founder time on a B2B festival lead is justified ONLY when ALL conditions met:
+
+1. **Fit Score ≥ 21** (per ICP v1.1 Section 15 — see `strategy/fit-score-worksheet.md` once shipped)
+2. **Relationship warmth** — Tier 1 or strong Tier 2
+3. **Budget potential exists** (not "we'll see")
+4. **Strategic brand value** for SDTV portfolio
+5. **Clear next action** identified by Maya/Marco/Kai
+
+If any condition missing → Maya holds the lead, agents handle without founder. Strategic exception (founder explicitly chooses) overrides only with logged reason.
+
+**Why:** Below-21 fit score leads consume founder energy without commercial return. ICP v1.1 explicitly says these create operational drag.
+
 ## Decision Authority Matrix
 
 | Decision Type | Who Decides | Who Advises |
@@ -437,6 +451,7 @@ When a task has a human final owner, agents:
 - Skills must never be saved in `~/Orgs/ikigai/.claude/skills/`. All skills must be shareable and reusable by other users — save them to `~/.local/share/skill-mix/sources/skills@razbakov/skills/`.
 - Don't include config (URLs, chat links, API paths, project-specific mappings) in skills. Config belongs in the organisation or project CLAUDE.md. Skills must stay generic and reusable.
 - When a task requires the user's authenticated browser session (social media, developer consoles, dashboards, any site where the user is signed in): use `mcp__Claude_in_Chrome__tabs_context_mcp` to connect to the user's existing browser, then use Claude in Chrome tools (`navigate`, `computer`, `read_page`, `find`, `form_input`).
+- **Hard ban: no AI agent logs into SDTV Instagram or Facebook accounts.** This applies to Claude (via Computer Use, Claude in Chrome, Playwright MCP), Manus, Operator, or any browser-automation tool — even for "one-off manual" tasks. Meta's anti-automation systems (intensified through 2025-2026) detect browser-agent patterns by login fingerprint and action timing, and bans on accounts the size of SDTV (IG 510K / FB 550K) are unrecoverable. All actions on SDTV IG/FB go through either: (a) a human directly, or (b) an approved Meta Business Partner (Meta Business Suite, ManyChat, CreatorFlow, Buffer) via official Graph API. For other accounts (Аранча, personal brand): same default until 60+ days of organic activity. Reference: `.claude/agent-memory/maya/ig-fb-automation-safety-2026-04.md`.
 - When asked to "create organization": (1) find the related project under `~/Projects/` and extract all context (README, CLAUDE.md, product docs, brand, etc.), (2) create `~/Orgs/<OrgName>/` using `/org-coach` on autopilot — full S3 structure with governance, domains, roles, agent definitions, (3) always create fresh, org-specific agents (Coordinator, Autopilot, and domain-specific roles) — never reuse existing agents like Maya/Viktor/Luna/Marco/Kai/Sage (they have different responsibilities and context per org), (4) add a routing agent to ikigai's `.claude/agents/` that `cd`s to the org and runs `claude --agent coordinator`. The envoy bot auto-discovers orgs from `~/Orgs/` — no registration needed. Reference: `~/Documents/Projects CURSOR/wedance-2026/` (WeDance S3 governance — same pattern: `00_Organization_Logbook/`, `01_Domains/`, `02_Roles/`, `03_Coordination/`).
 - Global `~/.claude/CLAUDE.md` must stay minimal — just personal info and pointers. All rules, skills, prompts, and agents live in their respective project/org CLAUDE.md files so they're shareable and composable.
 - When an API key or token is shared, immediately save it to the appropriate `.env` file (project-level or `~/.zshrc` for global keys), then use it from there. Never leave keys only in chat history.
