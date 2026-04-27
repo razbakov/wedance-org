@@ -352,6 +352,20 @@ When a task has a human final owner, agents:
 - do NOT substitute for human judgment, taste, or relationship presence
 - stay available for iteration after the human acts
 
+## Founder Time Gate (Maya)
+
+**Rule (set 2026-04-27):** Kirill founder time on a B2B festival lead is justified ONLY when ALL conditions met:
+
+1. **Fit Score ≥ 21** (per ICP v1.1 Section 15 — see `strategy/fit-score-worksheet.md` once shipped)
+2. **Relationship warmth** — Tier 1 or strong Tier 2
+3. **Budget potential exists** (not "we'll see")
+4. **Strategic brand value** for SDTV portfolio
+5. **Clear next action** identified by Maya/Marco/Kai
+
+If any condition missing → Maya holds the lead, agents handle without founder. Strategic exception (founder explicitly chooses) overrides only with logged reason.
+
+**Why:** Below-21 fit score leads consume founder energy without commercial return. ICP v1.1 explicitly says these create operational drag.
+
 ## Decision Authority Matrix
 
 | Decision Type | Who Decides | Who Advises |
