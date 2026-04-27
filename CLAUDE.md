@@ -1,5 +1,11 @@
 # WeDance — S3 Organization
 
+## Framework
+
+@/Users/razbakov/Projects/ikigai-team/CLAUDE.md
+
+---
+
 Dance community platform governed with Sociocracy 3.0. Two co-founders (Alex Razbakov, Kirill Korshikov) delegate operational domains to AI agents.
 
 ## Primary driver
