@@ -1,6 +1,6 @@
 # WeDance — Work Board
 
-**Last updated:** 2026-04-07 02:30
+**Last updated:** 2026-04-28
 **Maintained by:** Coordinator (Logbook Keeper)
 
 > This board is the single source of truth for work status. Backlog files define *what* needs doing; this board tracks *where* each item stands.
@@ -28,6 +28,7 @@ Prioritized items not yet ready to start (dependencies unmet or not yet approved
 | O-003 | Launch distribution for TSDF pilot | Festival Exp. | Operations | Marketing Lead | Schedule published (O-002) + community access |
 | O-004 | Set up experiment analytics | Festival Exp. | Operations | Analyst + Engineer | MVP built (O-001) + Alex provides analytics infra |
 | O-005 | View festival schedule (story) | Festival Exp. | Operations | Engineer | Part of O-001 |
+| O-008 | Charanga Habanera Munich (May 23) as v0 customer — concert event page + verified attendee roster + TicketTailor webhook ([scope](../01_Domains/Festival_Experience/Operations/Backlog/008_Charanga_v0.md)) | Festival Exp. | Operations | Engineer | Coordinator + Engineer estimation against O-001; TicketTailor webhook permissions (Alex) |
 
 ## Ready
 
@@ -76,6 +77,8 @@ G-002 TSDF selected ✓ — Kirill on-site Jun 5-8, MVP must be live before Jun 
 ```
 
 **Current bottleneck:** O-001 — MVP build. G-002 is resolved (TSDF). Hard deadline: **June 5** (Kirill arrives at TSDF).
+
+**New parallel track (O-008):** Charanga Habanera Munich (May 23) proposed as v0 customer — earlier, smaller, real ticketed event already selling on TicketTailor. Webhook + verified roster + concert page (~10-12 dev days). Direct engineer-cycle conflict with O-001; needs Coordinator decision on serial vs parallel before moving to Ready. Architecture (festival record, webhook, verified roster) is reusable for TSDF.
 
 ---
 
