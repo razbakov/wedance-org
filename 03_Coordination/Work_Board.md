@@ -1,6 +1,6 @@
 # WeDance — Work Board
 
-**Last updated:** 2026-04-28
+**Last updated:** 2026-05-20
 **Maintained by:** Coordinator (Logbook Keeper)
 
 > This board is the single source of truth for work status. Backlog files define *what* needs doing; this board tracks *where* each item stands.
@@ -28,7 +28,6 @@ Prioritized items not yet ready to start (dependencies unmet or not yet approved
 | O-003 | Launch distribution for TSDF pilot | Festival Exp. | Operations | Marketing Lead | Schedule published (O-002) + community access |
 | O-004 | Set up experiment analytics | Festival Exp. | Operations | Analyst + Engineer | MVP built (O-001) + Alex provides analytics infra |
 | O-005 | View festival schedule (story) | Festival Exp. | Operations | Engineer | Part of O-001 |
-| O-008 | Charanga Habanera Munich (May 23) as v0 customer — concert event page + verified attendee roster + TicketTailor webhook ([scope](../01_Domains/Festival_Experience/Operations/Backlog/008_Charanga_v0.md)) | Festival Exp. | Operations | Engineer | Coordinator + Engineer estimation against O-001; TicketTailor webhook permissions (Alex) |
 
 ## Ready
 
@@ -64,6 +63,7 @@ Merged, deployed, or decision recorded.
 | G-002 | Select pilot festival | Festival Exp. | Governance | 2026-04-07 | **TSDF selected.** Kirill on-site Jun 5-8. MVP must be live before Jun 5 for on-site distribution, observation, and interviews. |
 | O-006 | Import Nuxt app code | Festival Exp. | Operations | 2026-04-04 | PR #23 merged |
 | O-007 | Import design assets & docs | Festival Exp. | Operations | 2026-04-04 | PR #22 merged |
+| O-008 | Charanga Habanera Munich (May 23) as v0 customer ([scope](../01_Domains/Festival_Experience/Operations/Backlog/008_Charanga_v0.md)) | Festival Exp. | Operations | 2026-05-20 | **Shipped 3 days ahead of event.** 4 PRs merged: #25 webhook + schema, #26 magic-link claim, #27 + #28 DB-backed concert page, #29 verified roster. Prod env: DATABASE_URL + TICKETTAILOR_WEBHOOK_SECRET set on Vercel; schema applied + Charanga seeded directly via SQL (no destructive ops, 7 existing signups preserved). TT side: webhook ws_11417 registered (ORDER.CREATED → 2026.wedance.vip/api/webhooks/tickettailor), event-specific confirmation email updated with "Connect on WeDance" CTA. End-to-end verified via synthetic signed payload: HTTP 200, processed 1, DB row created with verified_ticket_holder=true (cleaned up post-test). Live URLs: /festivals/charanga-habanera-munich-2026, /charanga/claim, /api/webhooks/tickettailor. |
 
 ---
 
