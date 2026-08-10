@@ -223,7 +223,7 @@ partnerIg, partnerName
 This means the HTML/CSS is likely ported. What's probably missing:
 1. Server-side API (Express routes → need Nuxt server routes or API layer)
 2. Stripe integration (Elements mount, payment intent flow)
-3. Email templates (nodemailer setup + 6 HTML templates)
+3. Email templates (Resend via `lib/email.js` + 7 HTML templates). Env: `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`. Domain: socialdancetv.com
 4. Deep link handling (?flow=, ?ig=, ?auto=)
 5. Video preview proxy (FFmpeg)
 6. Filming Pass / QR system
