@@ -1,3 +1,5 @@
+> **RETIRED 2026-09-28.** Frozen since 2026-05-20. Work status lives in Linear, project `WeDance` — run `python3 ~/Orgs/ikigai/.bin/linear.py status --project WeDance`. Kept for history only; do not update or report from it.
+
 # WeDance — Work Board
 
 **Last updated:** 2026-05-20

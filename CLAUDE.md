@@ -37,7 +37,7 @@ Preset: numbered
 - Roles: `02_Roles/<Role_Name>/`
 - Role description: `02_Roles/<Role_Name>/Role_Description.md`
 - Coordination: `03_Coordination/`
-- Work board: `03_Coordination/Work_Board.md`
+- Work status: **Linear** — project `WeDance` (team `RAZ`, `linear.app/alosha`). Shell access: `python3 ~/Orgs/ikigai/.bin/linear.py status --project WeDance`. (`03_Coordination/Work_Board.md` is retired — frozen 2026-05-20.)
 - Review schedule: `03_Coordination/Review_and_Retrospective_Schedule.md`
 - Agents: `.claude/agents/`
 - Skills: `.claude/skills/`
@@ -50,7 +50,7 @@ Active domains: Festival Experience. Dormant: Discovery, Marketplace.
 
 | Agent | Reports to | Focus |
 |-------|-----------|-------|
-| Autopilot | Alex | Autonomous dispatch loop — dispatches agents for Ready items, updates board, reports to founders |
+| Autopilot | Alex | Autonomous dispatch loop — dispatches agents for Linear `Todo` issues, reports to founders |
 | Coordinator | Alex | Cross-agent status, blockers, dispatch recommendations |
 | Product Lead | Alex | Specs, stories, backlog, experiment design |
 | Engineer | Alex | Code, features, tests, PRs |
@@ -71,7 +71,7 @@ Active domains: Festival Experience. Dormant: Discovery, Marketplace.
 
 - Logbook is the source of truth for governance
 - Backlog items are individual files in domain governance/operations backlog directories
-- Work board (`03_Coordination/Work_Board.md`) is the single source of truth for work status — backlog files define what, the board tracks where each item stands
+- **Linear (project `WeDance`) is the single source of truth for work status.** `Todo` = approved by a founder; only founders move issues there. The markdown Work Board is retired and must not be used for status.
 - Pull system: agents pull from Ready when dispatched. WIP limit: 1 item per agent. No two agents modify the same files.
 - All agent work delivered via PRs to `~/Projects/wedance-2026/`
 - Requirements separate purpose (driver + requirement) from intervention (experiments)
