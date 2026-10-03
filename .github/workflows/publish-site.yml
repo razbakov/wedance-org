@@ -1,0 +1,14 @@
+# Rebuild org.wedance.vip whenever governance changes land on main.
+# The site (razbakov/wedance-site) renders every document in this repo at
+# build time, so a merged PR here is a published change there.
+name: Publish org site
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel deploy hook
+        run: curl -fsS -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
